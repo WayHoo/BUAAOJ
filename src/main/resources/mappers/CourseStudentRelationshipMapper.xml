@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace存放映射文件的路径，指动态代理方式的接口全类名-->
+<mapper namespace="cn.edu.buaa.onlinejudge.mapper.CourseStudentRelationshipMapper">
+
+    <resultMap id="CourseStudentRelationshipResultMap" type="CourseStudentRelationship">
+        <id property="relationshipId" column="relationship_id"></id>
+        <result property="courseId" column="course_id"></result>
+        <result property="studentId" column="student_id"></result>
+        <result property="isStudentAccept" column="is_student_accept" javaType="boolean" jdbcType="INTEGER"></result>
+        <result property="studentRole" column="student_role"></result>
+    </resultMap>
+
+    <select id="getCourseStudentRelationship" resultMap="CourseStudentRelationshipResultMap"
+            useCache="true">
+        SELECT * FROM course_student_relationships WHERE student_id = #{studentId} AND course_id = #{courseId};
+    </select>
+
+    <insert id="insertCourseStudentRelationship" parameterType="CourseStudentRelationship"
+            flushCache="true" useGeneratedKeys="true" keyProperty="relationshipId"
+            keyColumn="relationship_id">
+        INSERT INTO course_student_relationships (course_id, student_id, is_student_accept, student_role)
+        VALUES (#{courseId}, #{studentId}, #{isStudentAccept}, #{studentRole});
+    </insert>
+    
+    <select id="getCourseMembers" parameterType="int" resultMap="CourseStudentRelationshipResultMap" useCache="true">
+        SELECT * FROM course_student_relationships WHERE course_id = #{courseId} AND is_student_accept = 1;
+    </select>
+
+</mapper>

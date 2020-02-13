@@ -1,8 +1,6 @@
 package cn.edu.buaa.onlinejudge.controller;
 
-import cn.edu.buaa.onlinejudge.model.Department;
 import cn.edu.buaa.onlinejudge.model.Student;
-import cn.edu.buaa.onlinejudge.service.DepartmentService;
 import cn.edu.buaa.onlinejudge.service.StudentService;
 import cn.edu.buaa.onlinejudge.utils.HttpResponseWrapperUtil;
 import cn.edu.buaa.onlinejudge.utils.ImageVerifyCodeUtil;
@@ -27,9 +25,6 @@ import java.util.Map;
 public class AccountsController {
     @Autowired
     private StudentService studentService;
-
-    @Autowired
-    private DepartmentService departmentService;
 
     @ApiOperation(value = "生成图片验证码接口")
     @RequestMapping(value = "/getImgVerifyCode", method = RequestMethod.GET)

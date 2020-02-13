@@ -12,9 +12,9 @@ public class Course {
     private String courseName;
 
     /**
-     * 课程的开课教师
+     * 课程的开课教师ID
      */
-    private Teacher teacher;
+    private int teacherId;
 
     /**
      * 课程简介
@@ -31,18 +31,10 @@ public class Course {
      */
     public Course() { }
 
-    /**
-     * 课程的有参构造方法
-     * @param courseId - 课程的唯一标识符
-     * @param courseName - 课程名称
-     * @param teacher - 课程的开课教师
-     * @param introduction - 课程简介
-     * @param coursewareUrl - 课程资源路径
-     */
-    public Course(int courseId, String courseName, Teacher teacher, String introduction, String coursewareUrl) {
+    public Course(int courseId, String courseName, int teacherId, String introduction, String coursewareUrl) {
         this.courseId = courseId;
         this.courseName = courseName;
-        this.teacher = teacher;
+        this.teacherId = teacherId;
         this.introduction = introduction;
         this.coursewareUrl = coursewareUrl;
     }
@@ -63,12 +55,12 @@ public class Course {
         this.courseName = courseName;
     }
 
-    public Teacher getTeacher() {
-        return teacher;
+    public int getTeacherId() {
+        return teacherId;
     }
 
-    public void setTeacher(Teacher teacher) {
-        this.teacher = teacher;
+    public void setTeacherId(int teacherId) {
+        this.teacherId = teacherId;
     }
 
     public String getIntroduction() {
@@ -85,5 +77,16 @@ public class Course {
 
     public void setCoursewareUrl(String coursewareUrl) {
         this.coursewareUrl = coursewareUrl;
+    }
+
+    @Override
+    public String toString() {
+        return "Course{" +
+                "courseId=" + courseId +
+                ", courseName='" + courseName + '\'' +
+                ", teacherId=" + teacherId +
+                ", introduction='" + introduction + '\'' +
+                ", coursewareUrl='" + coursewareUrl + '\'' +
+                '}';
     }
 }

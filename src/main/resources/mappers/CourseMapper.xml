@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace存放映射文件的路径，指动态代理方式的接口全类名-->
+<mapper namespace="cn.edu.buaa.onlinejudge.mapper.CourseMapper">
+    
+    <resultMap id="CourseResultMap" type="Course">
+        <id property="courseId" column="course_id"></id>
+        <result property="courseName" column="course_name"></result>
+        <result property="introduction" column="introduction"></result>
+        <result property="teacherId" column="teacher_id"></result>
+        <result property="coursewareUrl" column="courseware_url"></result>
+    </resultMap>
+    
+    <select id="getAllCourses" resultMap="CourseResultMap" useCache="true">
+        SELECT * FROM courses;
+    </select>
+
+    <select id="getCourseById" parameterType="int" resultMap="CourseResultMap" useCache="true">
+        SELECT * FROM courses WHERE course_id = #{courseId};
+    </select>
+</mapper>
