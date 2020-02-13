@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace存放映射文件的路径，指动态代理方式的接口全类名-->
+<mapper namespace="cn.edu.buaa.onlinejudge.mapper.DepartmentMapper">
+
+    <resultMap id="DepartmentResultMap" type="Department">
+        <id property="departmentId" column="department_id"></id>
+        <result property="departmentName" column="department_name"></result>
+    </resultMap>
+
+    <select id="getDepartmentById" parameterType="int" resultMap="DepartmentResultMap"
+            useCache="true">
+        SELECT * FROM departments WHERE department_id = #{departmentId};
+    </select>
+
+    <select id="getAllDepartments" resultMap="DepartmentResultMap">
+        SELECT * FROM departments;
+    </select>
+
+</mapper>

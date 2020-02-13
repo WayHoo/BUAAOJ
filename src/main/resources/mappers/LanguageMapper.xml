@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace存放映射文件的路径，指动态代理方式的接口全类名-->
+<mapper namespace="cn.edu.buaa.onlinejudge.mapper.LanguageMapper">
+
+    <resultMap id="LanguageResultMap" type="Language">
+        <id property="languageId" column="language_id"></id>
+        <result property="languageName" column="language_name"></result>
+        <result property="compileCommand" column="compile_command"></result>
+        <result property="runCommand" column="run_command"></result>
+    </resultMap>
+
+    <select id="getLanguageById" resultMap="LanguageResultMap" useCache="true">
+        SELECT * FROM languages WHERE language_id = #{languageId};
+    </select>
+
+    <select id="getAllLanguages" resultMap="LanguageResultMap" useCache="true">
+        SELECT * FROM languages;
+    </select>
+
+</mapper>
