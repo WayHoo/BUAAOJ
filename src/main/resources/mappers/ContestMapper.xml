@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace存放映射文件的路径，指动态代理方式的接口全类名-->
+<mapper namespace="cn.edu.buaa.onlinejudge.mapper.ContestMapper">
+
+    <resultMap id="ContestResultMap" type="Contest">
+        <id property="contestId" column="contest_id"></id>
+        <result property="contestName" column="contest_name"></result>
+        <result property="courseId" column="course_id"></result>
+        <result property="startTime" column="start_time"></result>
+        <result property="finishTime" column="finish_time"></result>
+        <result property="isVisible" column="visibility" javaType="boolean" jdbcType="TINYINT"></result>
+        <result property="isAnswerable" column="status" javaType="boolean" jdbcType="TINYINT"></result>
+        <result property="introduction" column="introduction"></result>
+    </resultMap>
+
+    <select id="getContestById" parameterType="int" resultMap="ContestResultMap" useCache="true">
+        SELECT * FROM contests WHERE contest_id = #{contestId};
+    </select>
+
+    <select id="getContestsOfCourse" parameterType="int" resultMap="ContestResultMap" useCache="true">
+        SELECT * FROM contests WHERE course_id = #{courseId} AND visibility = 1 ORDER BY contest_id ASC;
+    </select>
+    
+    <select id="getTotalContestsNum" resultType="int" useCache="true">
+        SELECT COUNT(*) FROM contests;
+    </select>
+
+    <!--注意：在MyBatis中使用乘法运算需要将表达式置于${}之中，否则会报错-->
+    <select id="getPageContests" parameterType="Map" resultMap="ContestResultMap" useCache="true">
+        SELECT * FROM contests LIMIT #{pageSize} OFFSET ${pageIndex * pageSize};
+    </select>
+</mapper>

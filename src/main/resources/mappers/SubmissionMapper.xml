@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace存放映射文件的路径，指动态代理方式的接口全类名-->
+<mapper namespace="cn.edu.buaa.onlinejudge.mapper.SubmissionMapper">
+
+    <resultMap id="SubmissionResultMap" type="Submission">
+        <id property="submissionId" column="submission_id"></id>
+        <result property="studentId" column="student_id"></result>
+        <result property="problemId" column="problem_id"></result>
+        <result property="languageId" column="language_id"></result>
+        <result property="submitTime" column="submit_time"></result>
+        <result property="executeTime" column="execute_time"></result>
+        <result property="usedTime" column="used_time"></result>
+        <result property="usedMemory" column="used_memory"></result>
+        <result property="judgeScore" column="judge_score"></result>
+        <result property="judgeResult" column="judge_result"></result>
+        <result property="submitCode" column="submission_code"></result>
+        <result property="compileOutput" column="compile_output"></result>
+    </resultMap>
+
+    <select id="getProblemSubmitStudents" parameterType="long" resultType="long" useCache="true">
+        SELECT COUNT(DISTINCT student_id) FROM submissions WHERE problem_id = #{problemId};
+    </select>
+
+    <select id="getProblemSubmitTimes" parameterType="long" resultType="long" useCache="true">
+        SELECT COUNT(*) FROM submissions WHERE problem_id = #{problemId};
+    </select>
+    
+    <select id="getProblemAcceptStudents" parameterType="long" resultType="long" useCache="true">
+        SELECT COUNT(*) FROM
+            (SELECT judge_result FROM submissions WHERE submission_id IN
+                (SELECT MAX(submission_id) FROM submissions
+                    WHERE problem_id = #{problemId} GROUP BY student_id)) a
+            WHERE a.judge_result = 'AC';
+    </select>
+</mapper>

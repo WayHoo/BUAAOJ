@@ -14,7 +14,7 @@
     </resultMap>
     
     <select id="getAllCourses" resultMap="CourseResultMap" useCache="true">
-        SELECT * FROM courses;
+        SELECT * FROM courses ORDER BY course_id ASC;
     </select>
 
     <select id="getCourseById" parameterType="int" resultMap="CourseResultMap" useCache="true">

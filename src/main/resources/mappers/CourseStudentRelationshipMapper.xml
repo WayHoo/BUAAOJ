@@ -9,7 +9,7 @@
         <id property="relationshipId" column="relationship_id"></id>
         <result property="courseId" column="course_id"></result>
         <result property="studentId" column="student_id"></result>
-        <result property="isStudentAccept" column="is_student_accept" javaType="boolean" jdbcType="INTEGER"></result>
+        <result property="isStudentAccept" column="is_student_accept" javaType="boolean" jdbcType="TINYINT"></result>
         <result property="studentRole" column="student_role"></result>
     </resultMap>
 

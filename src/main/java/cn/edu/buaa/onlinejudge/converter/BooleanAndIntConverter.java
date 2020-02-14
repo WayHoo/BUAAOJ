@@ -22,6 +22,8 @@ public class BooleanAndIntConverter extends BaseTypeHandler<Boolean> {
         preparedStatement.setInt(i,aBoolean ? 1 : 0);
     }
 
+
+
     /**
      * get: DB(int) --> java(boolean)
      * @param resultSet JDBC查询结果集
@@ -30,21 +32,21 @@ public class BooleanAndIntConverter extends BaseTypeHandler<Boolean> {
      */
     @Override
     public Boolean getNullableResult(ResultSet resultSet, String columnLabel) throws SQLException {
-        int gender = resultSet.getInt(columnLabel);
-        return gender == 1;
+        int result = resultSet.getInt(columnLabel);
+        return result == 1;
     }
 
     //get: DB(int) --> java(boolean)
     @Override
     public Boolean getNullableResult(ResultSet resultSet, int i) throws SQLException {
-        int gender = resultSet.getInt(i);
-        return gender == 1;
+        int result = resultSet.getInt(i);
+        return result == 1;
     }
 
     //get: DB(int) --> java(boolean)
     @Override
     public Boolean getNullableResult(CallableStatement callableStatement, int i) throws SQLException {
-        int gender = callableStatement.getInt(i);
-        return gender == 1;
+        int result = callableStatement.getInt(i);
+        return result == 1;
     }
 }
