@@ -75,4 +75,7 @@ public class CourseService {
         return memberList;
     }
 
+    public List<Integer> getStudentJoinedCourseIdList(long studentId) {
+        return courseStudentRelationshipMapper.getStudentJoinedCourseIdList(studentId);
+    }
 }

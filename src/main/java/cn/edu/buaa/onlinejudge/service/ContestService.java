@@ -28,4 +28,8 @@ public class ContestService {
    public List<Contest> getPageContests(int pageSize,int pageIndex) {
        return contestMapper.getPageContests(pageSize,pageIndex);
    }
+
+   public List<Integer> getContestIdListByCourseIdList(List<Integer> courseIdList) {
+       return contestMapper.getContestIdListByCourseIdList(courseIdList);
+   }
 }

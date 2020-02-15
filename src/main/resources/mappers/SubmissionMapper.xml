@@ -35,4 +35,11 @@
                     WHERE problem_id = #{problemId} GROUP BY student_id)) a
             WHERE a.judge_result = 'AC';
     </select>
+
+    <select id="getStudentLatestSubmissionOfProblem" parameterType="Map"
+            resultMap="SubmissionResultMap" useCache="true">
+        SELECT * FROM submissions WHERE
+            submission_id = (SELECT MAX(submission_id)
+                FROM submissions WHERE student_id = #{studentId} AND problem_id = #{problemId});
+    </select>
 </mapper>

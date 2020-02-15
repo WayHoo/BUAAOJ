@@ -43,7 +43,7 @@ public class ContestController {
             return new HttpResponseWrapperUtil(null, -1, "课程不存在");
         }
         List<Contest> contestList = contestService.getContestsOfCourse(courseId);
-        Map<String,Object> data = wrapContestsJson(contestList);
+        Map<String,Object> data = wrapContests2Json(contestList);
         return new HttpResponseWrapperUtil(data);
     }
 
@@ -55,12 +55,12 @@ public class ContestController {
             return new HttpResponseWrapperUtil(null, -1, "failure");
         }
         List<Contest> contestList = contestService.getPageContests(pageSize,pageIndex);
-        Map<String,Object> data = wrapContestsJson(contestList);
+        Map<String,Object> data = wrapContests2Json(contestList);
         data.put("totalContestsNum",contestService.getTotalContestsNum());
         return new HttpResponseWrapperUtil(data);
     }
 
-    @ApiOperation("学生通过分页查看所有竞赛接口")
+    @ApiOperation("学生进入竞赛接口")
     @RequestMapping(value = "/enterContest/{contestId}", method = RequestMethod.GET)
     public HttpResponseWrapperUtil enterContest(@PathVariable("contestId") int contestId) {
         Contest contest = contestService.getContestById(contestId);
@@ -86,7 +86,7 @@ public class ContestController {
      * @param contestList - 竞赛列表
      * @return
      */
-    public Map<String,Object> wrapContestsJson(List<Contest> contestList) {
+    public Map<String,Object> wrapContests2Json(List<Contest> contestList) {
         Map<String,Object> data = new HashMap<>();
         data.put("serverCurrentTime",DateUtil.getCurrentTime());
         List<Object> contests = new ArrayList<>();

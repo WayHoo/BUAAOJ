@@ -1,11 +1,8 @@
 package cn.edu.buaa.onlinejudge.controller;
 
-import cn.edu.buaa.onlinejudge.model.Contest;
 import cn.edu.buaa.onlinejudge.model.Course;
-import cn.edu.buaa.onlinejudge.model.Problem;
 import cn.edu.buaa.onlinejudge.model.Student;
 import cn.edu.buaa.onlinejudge.service.*;
-import cn.edu.buaa.onlinejudge.utils.DateUtil;
 import cn.edu.buaa.onlinejudge.utils.HttpResponseWrapperUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -73,16 +70,12 @@ public class CoursesController {
     @RequestMapping(value = "/joinCourse/{studentId}/{courseId}", method = RequestMethod.GET)
     public HttpResponseWrapperUtil joinCourse(@PathVariable("studentId") long studentId,
                                                      @PathVariable("courseId") int courseId) {
-        Course course = courseService.getCourseById(courseId);
-        if( course == null ){
-            return new HttpResponseWrapperUtil(null, -1, "课程不存在");
+        Map<String,Object> map = wrapCourseStudentRelationship2Json(studentId,courseId);
+        HttpResponseWrapperUtil httpResponse = (HttpResponseWrapperUtil)map.get("httpResponse");
+        if( httpResponse != null ){
+            return httpResponse;
         }
-        Student student = studentService.getStudentById(studentId);
-        if( student == null ){
-            return new HttpResponseWrapperUtil(null, -1, "学生不存在");
-        }
-        int status = courseService.isStudentJoinCourse(studentId,courseId);
-        if( status >= 0 ){
+        if( (int)map.get("status") >= 0 ){
             return new HttpResponseWrapperUtil(null, -1, "请勿重复提交申请");
         }
         courseService.joinCourse(studentId,courseId);
@@ -93,51 +86,37 @@ public class CoursesController {
     @RequestMapping(value = "/getCourseMembers/{studentId}/{courseId}", method = RequestMethod.GET)
     public HttpResponseWrapperUtil getCourseMembers(@PathVariable("studentId") long studentId,
                                               @PathVariable("courseId") int courseId) {
-        Course course = courseService.getCourseById(courseId);
-        if( course == null ){
-            return new HttpResponseWrapperUtil(null, -1, "课程不存在");
+        Map<String,Object> map = wrapCourseStudentRelationship2Json(studentId,courseId);
+        HttpResponseWrapperUtil httpResponse = (HttpResponseWrapperUtil)map.get("httpResponse");
+        if( httpResponse != null ){
+            return httpResponse;
         }
-        Student student = studentService.getStudentById(studentId);
-        if( student == null ){
-            return new HttpResponseWrapperUtil(null, -1, "学生不存在");
-        }
-        int status = courseService.isStudentJoinCourse(studentId,courseId);
-        if( status != 1 ){
+        if( (int)map.get("status") != 1 ){
             return new HttpResponseWrapperUtil(null, -1, "请先加入课程");
         }
         List<Object> data = courseService.getCourseMembers(courseId);
         return new HttpResponseWrapperUtil(data);
     }
 
-    @ApiOperation("学生查看课程题库接口")
-    @RequestMapping(value = "/getProblemsOfCourse/{courseId}", method = RequestMethod.GET)
-    public HttpResponseWrapperUtil getProblemsOfCourse(@PathVariable("courseId") int courseId) {
+    /**
+     * 将学生与课程的关系封装为Map
+     * 为了避免代码冗余
+     * @param studentId - 学生ID
+     * @param courseId - 课程ID
+     * @return
+     */
+    public Map<String,Object> wrapCourseStudentRelationship2Json(long studentId, int courseId) {
+        Map<String,Object> result = new HashMap<>();
         Course course = courseService.getCourseById(courseId);
+        Student student = studentService.getStudentById(studentId);
         if( course == null ){
-            return new HttpResponseWrapperUtil(null, -1, "课程不存在");
+            result.put("httpResponse",new HttpResponseWrapperUtil(null, -1, "课程不存在"));
+        } else if( student == null ){
+            result.put("httpResponse",new HttpResponseWrapperUtil(null, -1, "学生不存在"));
+        } else{
+            result.put("httpResponse",null);
         }
-        List<Contest> contestList = contestService.getContestsOfCourse(courseId);
-        if( contestList == null || contestList.size() == 0 ){
-            return new HttpResponseWrapperUtil(null);
-        }
-        List<Integer> contestIdList = new ArrayList<>();
-        for (Contest contest : contestList) {
-            contestIdList.add(contest.getContestId());
-        }
-        List<Problem> problemList = problemService.getProblemsByContestIdList(contestIdList);
-        List<Object> data = new ArrayList<>();
-        for (Problem problem : problemList) {
-            Map<String,Object> metadata = new HashMap<>();
-            metadata.put("problemId",problem.getProblemId());
-            metadata.put("problemName",problem.getProblemName());
-            metadata.put("acceptStudents",
-                    submissionService.getProblemAcceptStudents(problem.getProblemId()));
-            metadata.put("submitStudents",
-                    submissionService.getProblemSubmitStudents(problem.getProblemId()));
-            metadata.put("submitTimes",
-                    submissionService.getProblemSubmitTimes(problem.getProblemId()));
-            data.add(metadata);
-        }
-        return new HttpResponseWrapperUtil(data);
+        result.put("status",courseService.isStudentJoinCourse(studentId,courseId));
+        return result;
     }
 }

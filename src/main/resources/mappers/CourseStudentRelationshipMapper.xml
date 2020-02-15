@@ -28,5 +28,9 @@
     <select id="getCourseMembers" parameterType="int" resultMap="CourseStudentRelationshipResultMap" useCache="true">
         SELECT * FROM course_student_relationships WHERE course_id = #{courseId} AND is_student_accept = 1;
     </select>
+    
+    <select id="getStudentJoinedCourseIdList" parameterType="long" resultType="int" useCache="true">
+        SELECT course_id FROM course_student_relationships WHERE student_id = #{studentId} AND is_student_accept = 1;
+    </select>
 
 </mapper>
