@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace存放映射文件的路径，指动态代理方式的接口全类名-->
+<mapper namespace="cn.edu.buaa.onlinejudge.mapper.TeacherMapper">
+
+    <resultMap id="TeacherResultMap" type="Teacher">
+        <id property="teacherId" column="teacher_id"></id>
+        <result property="email" column="email"></result>
+        <result property="teacherName" column="teacher_name"></result>
+        <result property="teacherNumber" column="teacher_number"></result>
+        <result property="password" column="password"></result>
+        <result property="departmentId" column="department_id"></result>
+        <result property="isAccept" column="is_accept" javaType="boolean" jdbcType="TINYINT"></result>
+        <result property="introduction" column="introduction"></result>
+    </resultMap>
+
+    <select id="getTeacherById" parameterType="int"
+            resultMap="TeacherResultMap" useCache="true">
+        SELECT * FROM teachers WHERE teacher_id = #{teacherId};
+    </select>
+
+    <select id="getTeacherByEmail" parameterType="String"
+            resultMap="TeacherResultMap" useCache="true">
+        SELECT * FROM teachers WHERE email = #{email};
+    </select>
+
+    <insert id="insertTeacher" parameterType="Teacher" flushCache="true"
+            keyProperty="teacherId" keyColumn="teacher_id" useGeneratedKeys="true">
+        INSERT INTO teachers (email, teacher_name, teacher_number, password, department_id, is_accept, introduction)
+        VALUES (#{email}, #{teacherName}, #{teacherNumber}, #{password}, #{departmentId}, #{isAccept}, #{introduction});
+    </insert>
+
+    <update id="updateTeacher" parameterType="Teacher" flushCache="true">
+        UPDATE teachers
+        <set>
+            <if test="teacherName != null and teacherName.length() > 0">teacher_name = #{teacherName},</if>
+            <if test="teacherNumber != null and teacherNumber.length() > 0">teacher_number = #{teacherNumber},</if>
+            <if test="departmentId > 0">department_id = #{departmentId},</if>
+            <if test="introduction != null">introduction = #{introduction},</if>
+        </set>
+        WHERE teacher_id = #{teacherId};
+    </update>
+
+    <update id="resetPassword" parameterType="Teacher" flushCache="true">
+        UPDATE teachers SET password = #{password} WHERE teacher_id = #{teacherId};
+    </update>
+</mapper>

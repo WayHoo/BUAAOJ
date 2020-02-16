@@ -17,6 +17,11 @@ public class Teacher {
     private String teacherName;
 
     /**
+     * 教职工编号
+     */
+    private String teacherNumber;
+
+    /**
      * 教师账户密码
      */
     private String password;
@@ -27,9 +32,9 @@ public class Teacher {
     private int departmentId;
 
     /**
-     * 教师的开课权限（true - 允许开课，false - 不允许开课）
+     * 教师是否通过系统管理员审核（true - 允许开课，false - 不允许开课）
      */
-    private boolean privilege;
+    private boolean isAccept;
 
     /**
      * 教师的个人简介
@@ -37,18 +42,25 @@ public class Teacher {
     private String introduction;
 
     /**
+     * 教师登录验证码
+     */
+    private String verifyCode;
+
+    /**
      * 教师的无参构造方法
      */
     public Teacher() { }
 
-    public Teacher(int teacherId, String email, String teacherName, String password, int departmentId, boolean privilege, String introduction) {
+    public Teacher(int teacherId, String email, String teacherName, String teacherNumber, String password, int departmentId, boolean isAccept, String introduction, String verifyCode) {
         this.teacherId = teacherId;
         this.email = email;
         this.teacherName = teacherName;
+        this.teacherNumber = teacherNumber;
         this.password = password;
         this.departmentId = departmentId;
-        this.privilege = privilege;
+        this.isAccept = isAccept;
         this.introduction = introduction;
+        this.verifyCode = verifyCode;
     }
 
     public int getTeacherId() {
@@ -75,6 +87,14 @@ public class Teacher {
         this.teacherName = teacherName;
     }
 
+    public String getTeacherNumber() {
+        return teacherNumber;
+    }
+
+    public void setTeacherNumber(String teacherNumber) {
+        this.teacherNumber = teacherNumber;
+    }
+
     public String getPassword() {
         return password;
     }
@@ -91,12 +111,12 @@ public class Teacher {
         this.departmentId = departmentId;
     }
 
-    public boolean isPrivilege() {
-        return privilege;
+    public boolean isAccept() {
+        return isAccept;
     }
 
-    public void setPrivilege(boolean privilege) {
-        this.privilege = privilege;
+    public void setAccept(boolean accept) {
+        isAccept = accept;
     }
 
     public String getIntroduction() {
@@ -107,16 +127,11 @@ public class Teacher {
         this.introduction = introduction;
     }
 
-    @Override
-    public String toString() {
-        return "Teacher{" +
-                "teacherId=" + teacherId +
-                ", email='" + email + '\'' +
-                ", teacherName='" + teacherName + '\'' +
-                ", password='" + password + '\'' +
-                ", departmentId=" + departmentId +
-                ", privilege=" + privilege +
-                ", introduction='" + introduction + '\'' +
-                '}';
+    public String getVerifyCode() {
+        return verifyCode;
+    }
+
+    public void setVerifyCode(String verifyCode) {
+        this.verifyCode = verifyCode;
     }
 }

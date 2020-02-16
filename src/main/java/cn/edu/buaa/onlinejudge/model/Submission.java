@@ -37,12 +37,12 @@ public class Submission {
     /**
      * 代码执行耗时
      */
-    private int usedTime;
+    private Integer usedTime;
 
     /**
      * 代码执行内存消耗
      */
-    private int usedMemory;
+    private Integer usedMemory;
 
     /**
      * 评测得分
@@ -50,9 +50,9 @@ public class Submission {
     private int judgeScore;
 
     /**
-     * 评测结果
+     * 评测结果，默认为"PD"(Pending)
      */
-    private String judgeResult;
+    private String judgeResult = "PD";
 
     /**
      * 提交的代码
@@ -114,19 +114,19 @@ public class Submission {
         this.executeTime = executeTime;
     }
 
-    public int getUsedTime() {
+    public Integer getUsedTime() {
         return usedTime;
     }
 
-    public void setUsedTime(int usedTime) {
+    public void setUsedTime(Integer usedTime) {
         this.usedTime = usedTime;
     }
 
-    public int getUsedMemory() {
+    public Integer getUsedMemory() {
         return usedMemory;
     }
 
-    public void setUsedMemory(int usedMemory) {
+    public void setUsedMemory(Integer usedMemory) {
         this.usedMemory = usedMemory;
     }
 

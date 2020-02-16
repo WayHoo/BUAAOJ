@@ -16,7 +16,7 @@
         <result property="usedMemory" column="used_memory"></result>
         <result property="judgeScore" column="judge_score"></result>
         <result property="judgeResult" column="judge_result"></result>
-        <result property="submitCode" column="submission_code"></result>
+        <result property="submitCode" column="submit_code"></result>
         <result property="compileOutput" column="compile_output"></result>
     </resultMap>
 
@@ -42,4 +42,32 @@
             submission_id = (SELECT MAX(submission_id)
                 FROM submissions WHERE student_id = #{studentId} AND problem_id = #{problemId});
     </select>
+
+    <select id="getSubmissionsByStudentIdAndProblemId" parameterType="Map"
+            resultMap="SubmissionResultMap" useCache="true">
+        SELECT * FROM submissions WHERE student_id = #{studentId} AND problem_id = #{problemId}
+        ORDER BY submission_id ASC;
+    </select>
+
+    <select id="getSubmissionsByStudentIdAndProblemIdList" parameterType="Map"
+            resultMap="SubmissionResultMap" useCache="true">
+        SELECT * FROM submissions WHERE student_id = #{studentId} AND problem_id IN
+        <choose>
+            <when test="problemIdList != null and problemIdList.size() > 0">
+                <foreach collection="problemIdList" item="problemId" separator="," open="(" close=")">
+                    #{problemId}
+                </foreach>
+            </when>
+            <otherwise>
+                (NULL)
+            </otherwise>
+        </choose>
+        ORDER BY submission_id ASC;
+    </select>
+
+    <insert id="insertSubmission" parameterType="Submission" flushCache="true"
+            useGeneratedKeys="true" keyProperty="submissionId" keyColumn="submission_id">
+        INSERT INTO submissions (student_id, problem_id, language_id, submit_time, execute_time, used_time, used_memory, judge_score, judge_result, submit_code, compile_output)
+        VALUES (#{studentId}, #{problemId}, #{languageId}, #{submitTime}, #{executeTime}, #{usedTime}, #{usedMemory}, #{judgeScore}, #{judgeResult}, #{submitCode}, #{compileOutput});
+    </insert>
 </mapper>

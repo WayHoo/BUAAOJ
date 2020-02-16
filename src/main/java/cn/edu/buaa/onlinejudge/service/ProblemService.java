@@ -40,4 +40,8 @@ public class ProblemService {
     public List<Problem> getProblemsOfContest(int contestId){
         return problemMapper.getProblemsOfContest(contestId);
     }
+
+    public List<Long> getProblemIdListOfContest(int contestId){
+        return problemMapper.getProblemIdListOfContest(contestId);
+    }
 }

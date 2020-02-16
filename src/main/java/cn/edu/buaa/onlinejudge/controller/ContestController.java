@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -44,7 +45,7 @@ public class ContestController {
         }
         List<Contest> contestList = contestService.getContestsOfCourse(courseId);
         Map<String,Object> data = wrapContests2Json(contestList);
-        return new HttpResponseWrapperUtil(data);
+        return new HttpResponseWrapperUtil(data.get("contests"));
     }
 
     @ApiOperation("学生通过分页查看所有竞赛接口")
@@ -71,6 +72,7 @@ public class ContestController {
         Map<String,Object> data = new HashMap<>();
         data.put("introduction",contest.getIntroduction());
         data.put("finishTime",DateUtil.formatTimestamp(contest.getFinishTime()));
+        data.put("contestStatus",judgeContestStatus(contest.getStartTime(),contest.getFinishTime()));
         data.put("serverCurrentTime",DateUtil.getCurrentTime());
         List<Problem> problemList = problemService.getProblemsOfContest(contestId);
         List<Long> problemIdList = new ArrayList<>();
@@ -88,18 +90,36 @@ public class ContestController {
      */
     public Map<String,Object> wrapContests2Json(List<Contest> contestList) {
         Map<String,Object> data = new HashMap<>();
-        data.put("serverCurrentTime",DateUtil.getCurrentTime());
         List<Object> contests = new ArrayList<>();
         for (Contest contest : contestList) {
             Map<String,Object> metadata = new HashMap<>();
             metadata.put("contestId",contest.getContestId());
             metadata.put("contestName",contest.getContestName());
-            metadata.put("contestStatus",contest.isAnswerable() ? 1 : 0);
+            int contestStatus = judgeContestStatus(contest.getStartTime(),contest.getFinishTime());
+            metadata.put("contestStatus",contestStatus);
+            metadata.put("isAnswerable",contest.isAnswerable() ? 1 : 0);
             metadata.put("startTime", DateUtil.formatTimestamp(contest.getStartTime()));
             metadata.put("finishTime",DateUtil.formatTimestamp(contest.getFinishTime()));
             contests.add(metadata);
         }
         data.put("contests",contests);
         return data;
+    }
+
+    /**
+     * 判断比赛进行状态，0 - 未开启，1 - 进行中，2 - 已结束
+     * @param startTime - 竞赛开始时间
+     * @param finishTime - 竞赛结束时间
+     * @return 竞赛进行状态值
+     */
+    public int judgeContestStatus(Timestamp startTime, Timestamp finishTime) {
+        int contestStatus = 0;
+        Timestamp currentTimestamp = DateUtil.getCurrentTimestamp();
+        if( currentTimestamp.after(startTime) && currentTimestamp.before(finishTime) ) {
+            contestStatus = 1;
+        } else if( currentTimestamp.after(finishTime) ){
+            contestStatus = 2;
+        }
+        return contestStatus;
     }
 }

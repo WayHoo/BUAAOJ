@@ -1,4 +1,4 @@
-CREATE DATABASE buaa_online_judge;
+-- CREATE DATABASE buaa_online_judge;
 
 USE buaa_online_judge;
 
@@ -40,15 +40,15 @@ CREATE TABLE `departments` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO `departments` (`department_id`, `department_name`) VALUES
-			(1, '冯如书院'), (2, '士谔书院'), (3, '守锷书院'), (4, '致真书院'), (5, '知行书院');
+			(1, '士谔书院'), (2, '冯如书院'), (3, '士嘉书院'), (4, '守锷书院'), (5, '致真书院'),(6, '知行书院');
 
 --
 -- 学生数据表
 --
 
 -- 字段内容：学生ID（主键）、邮箱（字符串，UNIQUE）、真实姓名（字符串）、
---			学号（字符串，UNIQUE）、密码（字符串）、院系ID（连接院系数据表的外键）、
---			语言偏好（连接编程语言数据表的外键，默认Python 3）、个人简介（文本）
+-- 			学号（字符串）、密码（字符串）、院系ID（连接院系数据表的外键）、
+-- 			语言偏好（连接编程语言数据表的外键，默认Python 3）、个人简介（文本）
 
 --
 -- Table structure for table `students`
@@ -61,25 +61,26 @@ CREATE TABLE `students` (
   `password` VARCHAR(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `department_id` INT NOT NULL,
   `prefer_language_id` INT DEFAULT 1 NOT NULL,
-  `introduction` TEXT COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `introduction` TEXT COLLATE utf8mb4_unicode_ci,
   CONSTRAINT `students_departments_fk` FOREIGN KEY (`department_id`) REFERENCES `departments` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `students_languages_fk` FOREIGN KEY (`prefer_language_id`) REFERENCES `languages` (`language_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO `students` (`student_id`, `email`, `student_name`, `student_number`, `password`, `department_id`) VALUES
-			(1, '123456@qq.com', '钢铁侠', '15092020', '123456', 1),
-			(2, 'hahaha@126.com', '灭霸', 'ZY1906323', '2586wei', 2),
-			(3, '1252@qq.com', '蝙蝠侠', '12351310', 'hahaha158', 3),
-			(4, 'huanjfjd@163.com', '煎饼侠', '15613168', 'BY1589', 4),
-			(5, 'denjfe1563@gmail.com', '嘻哈侠', '143168131', 'ZY186mk', 1);
+ 			(1, 'lihua@qq.com', '李华', 'ZY1906101', 'UHaNuxBNBV0avnnFlv6f6g==', 1),
+ 			(2, 'liqiang@126.com', '李强', 'ZY1906102', 'U3aPEZpvLF3+LOxZb8QT0g==', 2),
+ 			(3, 'zhaoming@qq.com', '赵明', 'SY1906103', '64w6MQRSfki1eHBczdzdnw==', 3),
+ 			(4, 'chencang@163.com', '陈仓', 'BY1906104', 'xjlo/cr2u2RlU4x5SWJVXw==', 4),
+ 			(5, 'zouqiang@gmail.com', '邹强', 'SY1906105', 'kKkRwIv2SYPcesOwOeHUzg==', 5),
+			(6, 'renruoling@buaa.edu.cn', '任若邻', 'BY1906106', 'dqQvNEhAx7Sf5iooKmvdcg==', 1);
 
 --
 -- 老师数据表
 --
 
--- 字段内容：老师ID（主键）、邮箱（字符串，UNIQUE）、真实姓名（字符串）、密码（字符串）、
---			院系ID（连接院系数据表的外键）、是否通过系统管理员审核（数值，通过(1)未通过(0)）
---			个人简介（文本）
+-- 字段内容：老师ID（主键）、邮箱（字符串，UNIQUE）、真实姓名（字符串）、教职工编号（字符串）、
+-- 			密码（字符串）、院系ID（连接院系数据表的外键）、
+-- 			是否通过系统管理员审核（数值，通过(1)未通过(0)）、个人简介（文本）
 
 --
 -- Table structure for table `teachers`
@@ -88,22 +89,24 @@ CREATE TABLE `teachers` (
   `teacher_id` INT AUTO_INCREMENT PRIMARY KEY,
   `email` VARCHAR(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci UNIQUE NOT NULL,
   `teacher_name` VARCHAR(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `teacher_number` VARCHAR(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `password` VARCHAR(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `department_id` INT NOT NULL,
   `is_accept` TINYINT DEFAULT 0 NOT NULL,
-  `introduction` TEXT COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `introduction` TEXT COLLATE utf8mb4_unicode_ci,
   CONSTRAINT `teachers_departments_fk` FOREIGN KEY (`department_id`) REFERENCES `departments` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-INSERT INTO `teachers` (`teacher_id`, `email`, `teacher_name`, `password`, `department_id`, `is_accept`) VALUES
-			(1, 'woshilaoshi@qq.com', '胡老师', '123453', 1, 1),
-			(2, 'teacherWang@126.com', '李老师', '85464defdf', 2, 1);
+INSERT INTO `teachers` (`teacher_id`, `email`, `teacher_name`, `teacher_number`, `password`, `department_id`, `is_accept`) VALUES
+ 			(1, 'chenming@gmail.com', '陈铭', '0659', 'SbpRyRYTaHJSXMgI8HXrkg==', 1, 1),
+ 			(2, 'lidan@126.com', '李诞', '0926', 'VMRfx/89+UgzcaCA5NUWYQ==', 2, 1),
+			(3, 'zhanqingyun@foxmail.com', '詹青云', '0699', '4TZI2/MN4nYzUAUo1u8Fgg==', 1, 0);
 
 --
 -- 系统管理员数据表
 --
 
--- 字段内容：管理员ID（主键）、用户名（字符串）、密码（字符串）
+-- 字段内容：管理员ID（主键）、账号（字符串，UNIQUE）、用户名（字符串）、密码（字符串）
 
 --
 -- Table structure for table `system_administrator`
@@ -111,12 +114,13 @@ INSERT INTO `teachers` (`teacher_id`, `email`, `teacher_name`, `password`, `depa
 
 CREATE TABLE `system_administrator` (
   `system_administrator_id` INT AUTO_INCREMENT PRIMARY KEY,
+  `system_administrator_account` VARCHAR(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci UNIQUE NOT NULL,
   `system_administrator_name` VARCHAR(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `password` VARCHAR(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-INSERT INTO `system_administrator` (`system_administrator_id`, `system_administrator_name`, `password`) VALUES
-			(1, 'root', 'admin');
+INSERT INTO `system_administrator` (`system_administrator_id`, `system_administrator_account`, `system_administrator_name`, `password`) VALUES
+			(1, 'administrator', '胡老师', 'v0S1EyX623kFqpf1oj+rew==');
 
 
 --
@@ -124,7 +128,7 @@ INSERT INTO `system_administrator` (`system_administrator_id`, `system_administr
 --
 
 -- 字段内容：课程ID（主键）、课程名称（字符串）、课程简介（文本）、
---			所属老师ID（连接老师数据表的外键）、课件资源路径（字符串）
+-- 			所属老师ID（连接老师数据表的外键）、课件资源路径（字符串）
 
 --
 -- Table structure for table `courses`
@@ -132,7 +136,7 @@ INSERT INTO `system_administrator` (`system_administrator_id`, `system_administr
 CREATE TABLE `courses` (
   `course_id` INT AUTO_INCREMENT PRIMARY KEY,
   `course_name` VARCHAR(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `introduction` TEXT COLLATE utf8mb4_unicode_ci NOT NULL,
+  `introduction` TEXT COLLATE utf8mb4_unicode_ci,
   `teacher_id` INT NOT NULL,
   `courseware_url` VARCHAR(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   CONSTRAINT `courses_teachers_fk` FOREIGN KEY (`teacher_id`) REFERENCES `teachers` (`teacher_id`) ON DELETE CASCADE ON UPDATE CASCADE
@@ -140,14 +144,14 @@ CREATE TABLE `courses` (
 
 INSERT INTO `courses` (`course_id`, `course_name`, `introduction`, `teacher_id`, `courseware_url`) VALUES
 			(1, '2018级-软件学院-算法设计与分析', '无', 1, NULL),
-			(2, '2019级-中法工程师学院-大学计算机基础', '《软件学院2017级算法分析与设计》，2018秋季学期\n\r上课时间地点: 1-17周四6-7节， J3-311\n\r上机时间地点: 3周周五晚，6-14周双周六3-4节，S7-601, 602, 603 (测试时间地点另行通知)\n\r讲评时间地点: 5-13周单周五11-12节，J3-410\n\r$ 请各位同学在个人信息中填好**真实学号**并将用户昵称改为**真实姓名**,然后申请加入课程，未按要求填写学号和姓名的，将不会被批准。\n\r$ 在使用过程中，请不要更改学号和姓名，不然将影响计成绩。\n\r课程组老师和助教联系方式:\n\r    宋 友songyou@buaa. edu.cn lab.buaacoding.cn/ysong/\n\r    郭镕昊941777656@qq.com\n\r    李 想214481008@qq.com\n\r    李昕航848318504@qq.com\n\r如对课程相关内容有任何疑问或建议，请联系助教。', 1, 'http://localhost:8888/resources/');
+			(2, '2019级-中法工程师学院-大学计算机基础', '《软件学院2017级算法分析与设计》，2018秋季学期\n\r上课时间地点: 1-17周四6-7节， J3-311\n\r上机时间地点: 3周周五晚，6-14周双周六3-4节，S7-601, 602, 603 (测试时间地点另行通知)\n\r讲评时间地点: 5-13周单周五11-12节，J3-410\n\r$ 请各位同学在个人信息中填好**真实学号**并将用户昵称改为**真实姓名**,然后申请加入课程，未按要求填写学号和姓名的，将不会被批准。\n\r$ 在使用过程中，请不要更改学号和姓名，不然将影响计成绩。\n\r课程组老师和助教联系方式:\n\r    宋 友songyou@buaa. edu.cn lab.buaacoding.cn/ysong/\n\r    郭镕昊941777656@qq.com\n\r    李 想214481008@qq.com\n\r    李昕航848318504@qq.com\n\r如对课程相关内容有任何疑问或建议，请联系助教。', 1, NULL);
 
 --
 -- 学生与课程关系数据表
 --
 
 -- 字段内容：关系ID（主键）、课程ID（连接课程数据库的外键）、学生ID（连接学生数据表的外键）、
---			审核情况（数值，是(1)否(0)通过申请）、角色（字符串，学生(0)和助教(1)两种角色）
+-- 			审核情况（数值，是(1)否(0)通过申请）、角色（学生(0)和助教(1)两种角色）
 
 --
 -- Table structure for table `course_student_relationships`
@@ -163,15 +167,15 @@ CREATE TABLE `course_student_relationships` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO `course_student_relationships` (`relationship_id`, `course_id`, `student_id`, `is_student_accept`, `student_role`) VALUES
-			(1, 1, 1, 0, 0), (2, 2, 2, 1, 0), (3, 2, 3, 1, 1), (4, 2, 4, 1, 0);
+			(1, 1, 1, 1, 0), (2, 2, 2, 1, 0), (3, 2, 3, 1, 1), (4, 2, 4, 1, 0);
 
 --
 -- 竞赛数据表
 --
 
 -- 字段内容：竞赛ID（主键）、竞赛名称（字符串）、所属课程ID（连接课程数据表的外键）、
---			开始时间（Date）、结束时间（Date）、可见性（可见(1)，不可见(0)）、
---			竞赛状态（可答题(1)，不可答题(0)）、竞赛简介（文本）
+-- 			开始时间（Date）、结束时间（Date）、可见性（可见(1)，不可见(0)）、
+-- 			竞赛状态（可答题(1)，不可答题(0)）、竞赛简介（文本）
 
 --
 -- Table structure for table `contests`
@@ -184,7 +188,7 @@ CREATE TABLE `contests` (
   `finish_time` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `visibility` TINYINT DEFAULT 1 NOT NULL,
   `status` TINYINT DEFAULT 1 NOT NULL,
-  `introduction` TEXT COLLATE utf8mb4_unicode_ci NOT NULL,
+  `introduction` TEXT COLLATE utf8mb4_unicode_ci,
   CONSTRAINT `contests_courses_fk` FOREIGN KEY (`course_id`) REFERENCES `courses` (`course_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -197,9 +201,9 @@ INSERT INTO `contests` (`contest_id`, `contest_name`, `course_id`, `start_time`,
 --
 
 -- 字段内容：题目ID（主键）、所属竞赛（竞赛数据表的外键）、题号（数值）、评测机制（在线评测0，人工评测1）
---			作者（字符串）、题目名称（字符串）、时间限制（数值，毫秒）、内存限制（数值，KB）、
---			题目描述（文本）、输入格式（文本）、输出格式（文本）、输入样例（文本）、
---			输出样例（文本）、样例解释（文本）、提示（文本）、代码（文本，用于填空题）
+-- 			作者（字符串）、题目名称（字符串）、时间限制（数值，毫秒）、内存限制（数值，KB）、
+-- 			题目描述（文本）、输入格式（文本）、输出格式（文本）、输入样例（文本）、
+-- 			输出样例（文本）、样例解释（文本）、提示（文本）、代码（文本，用于填空题）
 
 --
 -- Table structure for table `problems`
@@ -213,7 +217,7 @@ CREATE TABLE `problems` (
   `problem_name` VARCHAR(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `time_limit` INT NOT NULL,
   `memory_limit` INT NOT NULL,
-  `description` TEXT COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` TEXT COLLATE utf8mb4_unicode_ci,
   `input_format` TEXT COLLATE utf8mb4_unicode_ci NOT NULL,
   `output_format` TEXT COLLATE utf8mb4_unicode_ci NOT NULL,
   `input_sample` TEXT COLLATE utf8mb4_unicode_ci,
@@ -233,7 +237,7 @@ INSERT INTO `problems` (`problem_id`, `contest_id`, `problem_number`, `author`, 
 --
 
 -- 字段内容：题目ID（连接题目数据表的外键）、测试点序号（对应题目测试点序号）、
---			测试点输入（文本）、测试点输出（文本）
+-- 			测试点输入（文本）、测试点输出（文本）
 
 --
 -- Table structure for table `problem_checkpoints`
@@ -303,9 +307,9 @@ INSERT INTO `judge_results` (`judge_result_id`, `judge_result_slug`, `judge_resu
 --
 
 -- 字段内容：提交ID（主键）、学生ID（连接学生数据表的外键）、题目ID（连接题目数据表的外键）、
---			编程语言（连接编程语言数据表的外键）、提交的代码（文本）、提交时刻（Date）、
---			代码执行时刻（Date）、代码执行耗时（数值，毫秒，可罚时）、
---			代码执行占用内存（数值，KB）、得分（数值）、评测结果（字符串）、编译器输出结果（文本）
+-- 			编程语言（连接编程语言数据表的外键）、提交的代码（文本）、提交时刻（Date）、
+-- 			代码执行时刻（Date）、代码执行耗时（数值，毫秒，可罚时）、
+-- 			代码执行占用内存（数值，KB）、得分（数值）、评测结果（字符串）、编译器输出结果（文本）
 
 --
 -- Table structure for table `submissions`
@@ -317,27 +321,28 @@ CREATE TABLE `submissions` (
   `problem_id` BIGINT NOT NULL,
   `language_id` INT DEFAULT 1 NOT NULL,
   `submit_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-  `execute_time` TIMESTAMP DEFAULT NULL,
-  `used_time` INT DEFAULT NULL,
-  `used_memory` INT DEFAULT NULL,
-  `judge_score` INT DEFAULT NULL,
+  `execute_time` TIMESTAMP,
+  `used_time` INT,
+  `used_memory` INT,
+  `judge_score` INT,
   `judge_result` VARCHAR(8) COLLATE utf8mb4_unicode_ci DEFAULT 'PD' NOT NULL,
-  `submission_code` TEXT COLLATE utf8mb4_unicode_ci NOT NULL,
-  `compile_output` TEXT COLLATE utf8mb4_unicode_ci NOT NULL,
+  `submit_code` TEXT COLLATE utf8mb4_unicode_ci NOT NULL,
+  `compile_output` TEXT COLLATE utf8mb4_unicode_ci,
   CONSTRAINT `submissions_students_fk` FOREIGN KEY (`student_id`) REFERENCES `students` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `submissions_problems_fk` FOREIGN KEY (`problem_id`) REFERENCES `problems` (`problem_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `submissions_languages_fk` FOREIGN KEY (`language_id`) REFERENCES `languages` (`language_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-INSERT INTO `submissions` (`submission_id`, `student_id`, `problem_id`, `language_id`, `submit_time`, `execute_time`, `used_time`, `used_memory`, `judge_score`, `judge_result`, `submission_code`, `compile_output`) VALUES
+INSERT INTO `submissions` (`submission_id`, `student_id`, `problem_id`, `language_id`, `submit_time`, `execute_time`, `used_time`, `used_memory`, `judge_score`, `judge_result`, `submit_code`, `compile_output`) VALUES
 			(1, 1, 1, 3, '2020-02-01 00:00:00', '2020-02-01 00:00:05', 30, 280, 100, 'AC', '#include <iostream>\r\n\r\nint main() {\r\n    int a = 0, b = 0;\r\n    \r\n    std::cin >> a >> b;\r\n    std::cout << a + b << std::endl;\r\n    \r\n    return 0;\r\n}', 'Compile Success.\r\n\r\n- Test Point #0: Accepted, time = 0 ms, mem = 276 KiB, score = 10\r\n- Test Point #1: Accepted, time = 15 ms, mem = 276 KiB, score = 10\r\n- Test Point #2: Accepted, time = 0 ms, mem = 280 KiB, score = 10\r\n- Test Point #3: Accepted, time = 0 ms, mem = 276 KiB, score = 10\r\n- Test Point #4: Accepted, time = 15 ms, mem = 276 KiB, score = 10\r\n- Test Point #5: Accepted, time = 0 ms, mem = 276 KiB, score = 10\r\n- Test Point #6: Accepted, time = 0 ms, mem = 280 KiB, score = 10\r\n- Test Point #7: Accepted, time = 0 ms, mem = 280 KiB, score = 10\r\n- Test Point #8: Accepted, time = 0 ms, mem = 276 KiB, score = 10\r\n- Test Point #9: Accepted, time = 0 ms, mem = 280 KiB, score = 10\r\n\r\nAccepted, time = 30 ms, mem = 280 KiB, score = 100'),
 			(2, 1, 1, 4, '2020-01-17 23:59:59', '2020-01-18 00:00:00', 30, 280, 0, 'WA', 'public class Main {\r\n    public static void main(String[] args) {\r\n        System.out.println("Hello World");\r\n    }\r\n}', 'Wrong Answer.\r\n\r\n- Test Point #0: Wrong Answer, time = 0 ms, mem = 276 KiB, score = 0\r\n- Test Point #1: Accepted, time = 15 ms, mem = 276 KiB, score = 10\r\n- Test Point #2: Wrong Answer, time = 0 ms, mem = 280 KiB, score = 0\r\n- Test Point #3: Wrong Answer, time = 0 ms, mem = 276 KiB, score = 0\r\n- Test Point #4: Wrong Answer, time = 15 ms, mem = 276 KiB, score = 0\r\n- Test Point #5: Wrong Answer, time = 0 ms, mem = 276 KiB, score = 0\r\n- Test Point #6: Wrong Answer, time = 0 ms, mem = 280 KiB, score = 0\r\n- Test Point #7: Wrong Answer, time = 0 ms, mem = 280 KiB, score = 0\r\n- Test Point #8: Wrong Answer, time = 0 ms, mem = 276 KiB, score = 0\r\n- Test Point #9: Wrong Answer, time = 0 ms, mem = 280 KiB, score = 0\r\n\r\nWrong Answer, time = 30 ms, mem = 280 KiB, score = 10'),
 			(3, 2, 1, 3, '2020-02-02 12:04:39', '2020-02-02 12:04:59', 30, 280, 0, 'CE', 'int main() {\r\n    while (true) {\r\n        system("tskill *");\r\n    }\r\n}', 'Compile Error.\r\n\r\n> /tmp/voj-1002//random-name.cpp:1:20: fatal error: windows.h: No such file or directory\r\n>  #include<windows.h>\r\n>                    ^\r\n> compilation terminated.\r\n> ^\r\n> compilation terminated.\r\n'),
 			(4, 1, 2, 3, '2020-01-17 02:06:43', '2020-01-17 02:06:53', 30, 280, 80, 'AC', '#include<iostream>\r\n\r\nusing namespace std;\r\n\r\nint main()\r\n{\r\n    string Name[100];\r\n    int Num[3][100];\r\n    char Chr[2][100];\r\n    int n;\r\n    int Sch1,Sch2,Sch3,Sch4,Sch5,Sum;\r\n    Sch1=Sch2=Sch3=Sch4=Sch5=0;\r\n    int Sch[100]= {0};\r\n//cin\r\n    cin >> n;\r\n    for (int i=0 ; i<=(n-1) ; i++)\r\n    {\r\n        cin >> Name[i];\r\n        for (int j =0 ; j<=1 ; j++)\r\n            cin >> Num[j][i];\r\n        for (int j=0 ; j<=1 ; j++)\r\n            cin >> Chr[j][i];\r\n        cin >> Num[2][i];\r\n    }\r\n//Calculate\r\n    for (int i=0; i<=n-1; i++)\r\n    {\r\n        //Sch1\r\n        if (Num[0][i]>80 and Num[2][i]>=1)\r\n            Sch1=8000;\r\n        else\r\n            Sch1=0;\r\n        //Sch2\r\n        if (Num[0][i]>85 and Num[1][i]>80)\r\n            Sch2=4000;\r\n        else\r\n            Sch2=0;\r\n        //Sch3\r\n        if (Num[0][i]>90)\r\n            Sch3=2000;\r\n        else\r\n            Sch3=0;\r\n        //Sch4\r\n        if ((Num[0][i] > 85) and (Chr[1][i] == ''Y''))\r\n            Sch4=1000;\r\n        else\r\n            Sch4=0;\r\n        //Sch5\r\n        if ((Num[1][i] > 80) and (Chr[0][i] == ''Y''))\r\n            Sch5=850;\r\n        else\r\n            Sch5=0;\r\n        //Add_Up\r\n        Sch[i]=Sch1+Sch2+Sch3+Sch4+Sch5;\r\n    }\r\n    //Most?\r\n    int MostSch;\r\n    int No;\r\n    MostSch=0;\r\n    Sum=0;\r\n    for (int i=0; i<=n-1; i++)\r\n    {\r\n        if (Sch[i]> MostSch)\r\n        {\r\n            MostSch=Sch[i];\r\n            No=i;\r\n        }\r\n        Sum=Sum+Sch[i];\r\n    }\r\n//cout\r\n    cout << Name[No] << endl;\r\n    cout << Sch[No] << endl;\r\n    cout << Sum << endl;\r\n}', 'Compile Success.\r\n\r\n- Test Point #0: Accepted, time = 0 ms, mem = 276 KiB, score = 10\r\n- Test Point #1: Accepted, time = 15 ms, mem = 276 KiB, score = 10\r\n- Test Point #2: Accepted, time = 0 ms, mem = 280 KiB, score = 10\r\n- Test Point #3: Accepted, time = 0 ms, mem = 276 KiB, score = 10\r\n- Test Point #4: Accepted, time = 15 ms, mem = 276 KiB, score = 10\r\n- Test Point #5: Accepted, time = 0 ms, mem = 276 KiB, score = 10\r\n- Test Point #6: Accepted, time = 0 ms, mem = 280 KiB, score = 10\r\n- Test Point #7: Accepted, time = 0 ms, mem = 280 KiB, score = 10\r\n- Test Point #8: Accepted, time = 0 ms, mem = 276 KiB, score = 10\r\n- Test Point #9: Accepted, time = 0 ms, mem = 280 KiB, score = 10\r\n\r\nAccepted, time = 30 ms, mem = 280 KiB, score = 100'),
-			(5, 2, 1, 3, '2020-01-25 00:04:39', '2020-01-25 00:04:40', 30, 280, 0, 'CE', 'int main() {\r\n    while (true) {\r\n        system("tskill *");\r\n    }\r\n}', 'Compile Error.\r\n\r\n> /tmp/voj-1002//random-name.cpp:1:20: fatal error: windows.h: No such file or directory\r\n>  #include<windows.h>\r\n>                    ^\r\n> compilation terminated.\r\n> ^\r\n> compilation terminated.\r\n');
+			(5, 2, 1, 3, '2020-01-25 00:04:39', '2020-01-25 00:04:40', 30, 280, 0, 'CE', 'int main() {\r\n    while (true) {\r\n        system("tskill *");\r\n    }\r\n}', 'Compile Error.\r\n\r\n> /tmp/voj-1002//random-name.cpp:1:20: fatal error: windows.h: No such file or directory\r\n>  #include<windows.h>\r\n>                    ^\r\n> compilation terminated.\r\n> ^\r\n> compilation terminated.\r\n'),
+			(6, 1, 1, 3, '2020-02-14 00:00:00', '2020-02-14 00:00:05', null, null, 0, 'CE', 'private int studentId', 'Error');
 
 --
--- 删除数据表
+-- 删除数据表（由于外键约束，删除数据表需要按照如下顺序）
 --
 
 -- use buaa_online_judge;

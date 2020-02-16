@@ -6,6 +6,8 @@ import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class SubmissionService {
     @Autowired
@@ -25,5 +27,17 @@ public class SubmissionService {
 
     public Submission getStudentLatestSubmissionOfProblem(long studentId,long problemId) {
         return submissionMapper.getStudentLatestSubmissionOfProblem(studentId,problemId);
+    }
+
+    public List<Submission> getSubmissionsByStudentIdAndProblemId(@Param("studentId") long studentId, @Param("problemId") long problemId) {
+        return submissionMapper.getSubmissionsByStudentIdAndProblemId(studentId,problemId);
+    }
+
+    public List<Submission> getSubmissionsByStudentIdAndProblemIdList(long studentId, List<Long> problemIdList) {
+        return submissionMapper.getSubmissionsByStudentIdAndProblemIdList(studentId,problemIdList);
+    }
+
+    public void insertSubmission(Submission submission){
+        submissionMapper.insertSubmission(submission);
     }
 }

@@ -17,7 +17,7 @@ import java.util.*;
 @Api(tags = "课程相关接口")
 @RestController
 @RequestMapping(value = "BUAAOJ/courses")
-public class CoursesController {
+public class CourseController {
     @Autowired
     private CourseService courseService;
 

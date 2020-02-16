@@ -3,9 +3,7 @@ package cn.edu.buaa.onlinejudge;
 import org.junit.jupiter.api.Test;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 public class TimestampTest extends OnlinejudgeApplicationTests {
     @Test
