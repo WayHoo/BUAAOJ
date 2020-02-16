@@ -10,7 +10,7 @@ public class TeacherService {
     @Autowired
     private TeacherMapper teacherMapper;
 
-    public Teacher getTeacherById(int teacherId){
+    public Teacher getTeacherById(long teacherId){
         return teacherMapper.getTeacherById(teacherId);
     }
 

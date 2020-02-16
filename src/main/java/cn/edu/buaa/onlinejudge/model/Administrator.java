@@ -2,7 +2,7 @@ package cn.edu.buaa.onlinejudge.model;
 
 public class Administrator {
     /**
-     * 系统管理员唯一标识符
+     * 系统管理员ID
      */
     private int administratorId;
 

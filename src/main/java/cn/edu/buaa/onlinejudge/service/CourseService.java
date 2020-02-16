@@ -68,8 +68,8 @@ public class CourseService {
             Map<String,Object> metadata = new HashMap<>();
             metadata.put("studentRole",relationship.getStudentRole());
             Student student = studentMapper.getStudentById(relationship.getStudentId());
-            metadata.put("studentName",student.getStudentName());
-            metadata.put("studentNumber",student.getStudentNumber());
+            metadata.put("studentName",student.getUserName());
+            metadata.put("studentNumber",student.getUserNumber());
             memberList.add(metadata);
         }
         return memberList;

@@ -2,7 +2,7 @@ package cn.edu.buaa.onlinejudge.model;
 
 public class Course {
     /**
-     * 课程唯一标识符
+     * 课程ID
      */
     private int courseId;
 

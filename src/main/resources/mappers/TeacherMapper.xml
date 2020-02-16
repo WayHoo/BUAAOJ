@@ -6,17 +6,17 @@
 <mapper namespace="cn.edu.buaa.onlinejudge.mapper.TeacherMapper">
 
     <resultMap id="TeacherResultMap" type="Teacher">
-        <id property="teacherId" column="teacher_id"></id>
+        <id property="userId" column="teacher_id"></id>
         <result property="email" column="email"></result>
-        <result property="teacherName" column="teacher_name"></result>
-        <result property="teacherNumber" column="teacher_number"></result>
+        <result property="userName" column="teacher_name"></result>
+        <result property="userNumber" column="teacher_number"></result>
         <result property="password" column="password"></result>
         <result property="departmentId" column="department_id"></result>
         <result property="isAccept" column="is_accept" javaType="boolean" jdbcType="TINYINT"></result>
         <result property="introduction" column="introduction"></result>
     </resultMap>
 
-    <select id="getTeacherById" parameterType="int"
+    <select id="getTeacherById" parameterType="long"
             resultMap="TeacherResultMap" useCache="true">
         SELECT * FROM teachers WHERE teacher_id = #{teacherId};
     </select>
@@ -27,23 +27,23 @@
     </select>
 
     <insert id="insertTeacher" parameterType="Teacher" flushCache="true"
-            keyProperty="teacherId" keyColumn="teacher_id" useGeneratedKeys="true">
+            keyProperty="userId" keyColumn="teacher_id" useGeneratedKeys="true">
         INSERT INTO teachers (email, teacher_name, teacher_number, password, department_id, is_accept, introduction)
-        VALUES (#{email}, #{teacherName}, #{teacherNumber}, #{password}, #{departmentId}, #{isAccept}, #{introduction});
+        VALUES (#{email}, #{userName}, #{userNumber}, #{password}, #{departmentId}, #{isAccept}, #{introduction});
     </insert>
 
     <update id="updateTeacher" parameterType="Teacher" flushCache="true">
         UPDATE teachers
         <set>
-            <if test="teacherName != null and teacherName.length() > 0">teacher_name = #{teacherName},</if>
-            <if test="teacherNumber != null and teacherNumber.length() > 0">teacher_number = #{teacherNumber},</if>
+            <if test="userName != null and userName.length() > 0">teacher_name = #{userName},</if>
+            <if test="userNumber != null and userNumber.length() > 0">teacher_number = #{userNumber},</if>
             <if test="departmentId > 0">department_id = #{departmentId},</if>
             <if test="introduction != null">introduction = #{introduction},</if>
         </set>
-        WHERE teacher_id = #{teacherId};
+        WHERE teacher_id = #{userId};
     </update>
 
     <update id="resetPassword" parameterType="Teacher" flushCache="true">
-        UPDATE teachers SET password = #{password} WHERE teacher_id = #{teacherId};
+        UPDATE teachers SET password = #{password} WHERE teacher_id = #{userId};
     </update>
 </mapper>

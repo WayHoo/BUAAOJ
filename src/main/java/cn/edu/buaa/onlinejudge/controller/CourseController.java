@@ -24,15 +24,6 @@ public class CourseController {
     @Autowired
     private StudentService studentService;
 
-    @Autowired
-    private ContestService contestService;
-
-    @Autowired
-    private ProblemService problemService;
-
-    @Autowired
-    private SubmissionService submissionService;
-
     @ApiOperation("查看所有课程接口")
     @RequestMapping(value = "/getAllCourses", method = RequestMethod.GET)
     public HttpResponseWrapperUtil getAllCourses() {

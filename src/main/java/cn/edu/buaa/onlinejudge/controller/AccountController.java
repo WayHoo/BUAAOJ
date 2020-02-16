@@ -2,6 +2,7 @@ package cn.edu.buaa.onlinejudge.controller;
 
 import cn.edu.buaa.onlinejudge.model.Student;
 import cn.edu.buaa.onlinejudge.model.Teacher;
+import cn.edu.buaa.onlinejudge.model.User;
 import cn.edu.buaa.onlinejudge.service.StudentService;
 import cn.edu.buaa.onlinejudge.service.TeacherService;
 import cn.edu.buaa.onlinejudge.utils.HttpResponseWrapperUtil;
@@ -48,188 +49,157 @@ public class AccountController {
         }
     }
 
-    @ApiOperation(value = "学生登录接口")
-    @RequestMapping(value = "/studentLogin", method = RequestMethod.POST)
-    public HttpResponseWrapperUtil studentLogin(@RequestBody Student stu, HttpSession session) {
+    /**
+     * 用户（学生和教师）登录
+     * @param user - 用户对象
+     * @param tag - 用户标签，0表示学生，1表示教师
+     * @param session - 会话
+     * @return JSON数据
+     */
+    @ApiOperation(value = "用户（学生和教师）登录接口")
+    @RequestMapping(value = "/login/{tag}", method = RequestMethod.POST)
+    public HttpResponseWrapperUtil login(@RequestBody User user, @PathVariable("tag") int tag, HttpSession session) {
         String codeInSession = (String) session.getAttribute("verifyCode");
-        if( !checkVerifyCode(codeInSession, stu.getVerifyCode()) ) {
+        if( !checkVerifyCode(codeInSession, user.getVerifyCode()) ) {
             return new HttpResponseWrapperUtil(null, -1, "验证码错误");
         }
-        Student realStu = studentService.getStudentByEmail(stu.getEmail());
-        if( realStu == null ){
+        User realUser = null;
+        if( tag == 0 ){
+            realUser = studentService.getStudentByEmail(user.getEmail());
+        } else if( tag == 1 ){
+            realUser = teacherService.getTeacherByEmail(user.getEmail());
+        } else{
+            return new HttpResponseWrapperUtil(null, -1, "tag参数错误");
+        }
+        if( realUser == null ){
             return new HttpResponseWrapperUtil(null, -1, "账号不存在");
         }
-        if( !MD5Util.verifyMD5(stu.getPassword(), realStu.getPassword()) ){
+        if( !MD5Util.verifyMD5(user.getPassword(), realUser.getPassword()) ){
             return new HttpResponseWrapperUtil(null, -1, "账号或密码错误");
         }
         Map<String,Object> data = new HashMap<>();
-        data.put("studentId",realStu.getStudentId());
-        data.put("studentName",realStu.getStudentName());
+        data.put("userId",realUser.getUserId());
+        data.put("userName",realUser.getUserName());
         return new HttpResponseWrapperUtil(data);
     }
 
-    @ApiOperation(value = "教师登录接口")
-    @RequestMapping(value = "/teacherLogin", method = RequestMethod.POST)
-    public HttpResponseWrapperUtil teacherLogin(@RequestBody Teacher teacher, HttpSession session) {
-        String codeInSession = (String) session.getAttribute("verifyCode");
-        if( !checkVerifyCode(codeInSession, teacher.getVerifyCode()) ) {
-            return new HttpResponseWrapperUtil(null, -1, "验证码错误");
+    /**
+     * 用户（学生和教师）注册
+     * @param user - 用户对象
+     * @param tag - 用户标签，0表示学生，1表示教师
+     * @param session - 会话
+     * @return JSON数据
+     */
+    @ApiOperation("用户（学生和教师）注册接口")
+    @RequestMapping(value = "/register/{tag}", method = RequestMethod.POST)
+    public HttpResponseWrapperUtil register(@RequestBody User user, @PathVariable("tag") int tag, HttpSession session){
+        User realUser = null;
+        if( tag == 0 ){
+            realUser = studentService.getStudentByEmail(user.getEmail());
+        } else if( tag == 1 ){
+            realUser = teacherService.getTeacherByEmail(user.getEmail());
+        } else{
+            return new HttpResponseWrapperUtil(null, -1, "tag参数错误");
         }
-        Teacher realTeacher = teacherService.getTeacherByEmail(teacher.getEmail());
-        if( realTeacher == null ){
-            return new HttpResponseWrapperUtil(null, -1, "账号不存在");
-        }
-        if( !MD5Util.verifyMD5(teacher.getPassword(), realTeacher.getPassword()) ){
-            return new HttpResponseWrapperUtil(null, -1, "账号或密码错误");
-        }
-        Map<String,Object> data = new HashMap<>();
-        data.put("teacherId",realTeacher.getTeacherId());
-        data.put("teacherName",realTeacher.getTeacherName());
-        data.put("isTeacherAccept",realTeacher.isAccept() ? 1 : 0);
-        return new HttpResponseWrapperUtil(data);
-    }
-
-    @ApiOperation("学生注册接口")
-    @RequestMapping(value = "/studentRegister", method = RequestMethod.POST)
-    public HttpResponseWrapperUtil studentRegister(@RequestBody Student stu, HttpSession session){
-        Student realStu = studentService.getStudentByEmail(stu.getEmail());
-        if( realStu != null ){
+        if( realUser != null ){
             return new HttpResponseWrapperUtil(null, -1, "该邮箱已注册");
         }
         String codeInSession = (String) session.getAttribute("verifyCode");
-        if( !checkVerifyCode(codeInSession, stu.getVerifyCode()) ) {
+        if( !checkVerifyCode(codeInSession, user.getVerifyCode()) ) {
             return new HttpResponseWrapperUtil(null, -1, "验证码错误");
         }
-        stu.setPassword(MD5Util.encryptedByMD5(stu.getPassword()));
-        studentService.insertStudent(stu);
+        user.setPassword(MD5Util.encryptedByMD5(user.getPassword()));
+        User newUser = null;
+        if( tag == 0 ){
+            newUser = new Student(user);
+            studentService.insertStudent((Student)newUser);
+        } else{
+            newUser = new Teacher(user);
+            teacherService.insertTeacher((Teacher)newUser);
+        }
         Map<String,Object> data = new HashMap<>();
-        data.put("studentId",stu.getStudentId());
-        data.put("studentName",stu.getStudentName());
+        data.put("userId",newUser.getUserId());
+        data.put("userName",newUser.getUserName());
         return new HttpResponseWrapperUtil(data);
     }
 
-    @ApiOperation("教师注册接口")
-    @RequestMapping(value = "/teacherRegister", method = RequestMethod.POST)
-    public HttpResponseWrapperUtil teacherRegister(@RequestBody Teacher teacher, HttpSession session){
-        Teacher realTeacher = teacherService.getTeacherByEmail(teacher.getEmail());
-        if( realTeacher != null ){
-            return new HttpResponseWrapperUtil(null, -1, "该邮箱已注册");
+    @ApiOperation("查看用户信息接口")
+    @RequestMapping(value = "/getUserInfo/{tag}/{userId}", method = RequestMethod.GET)
+    public HttpResponseWrapperUtil getUserInfo(@PathVariable("tag") int tag, @PathVariable("userId") long userId){
+        User user = null;
+        if( tag == 0 ){
+            user = studentService.getStudentById(userId);
+        }else if( tag == 1 ){
+            user = teacherService.getTeacherById(userId);
+        }else{
+            return new HttpResponseWrapperUtil(null, -1, "tag参数错误");
         }
-        String codeInSession = (String) session.getAttribute("verifyCode");
-        if( !checkVerifyCode(codeInSession, teacher.getVerifyCode()) ) {
-            return new HttpResponseWrapperUtil(null, -1, "验证码错误");
-        }
-        teacher.setPassword(MD5Util.encryptedByMD5(teacher.getPassword()));
-        teacherService.insertTeacher(teacher);
-        Map<String,Object> data = new HashMap<>();
-        data.put("teacherId",teacher.getTeacherId());
-        data.put("teacherName",teacher.getTeacherName());
-        return new HttpResponseWrapperUtil(data);
-    }
-
-    @ApiOperation("查看学生信息接口")
-    @RequestMapping(value = "/getStudentInfo/{studentId}", method = RequestMethod.GET)
-    public HttpResponseWrapperUtil getStudentInfo(@PathVariable("studentId") long studentId){
-        Student stu = studentService.getStudentById(studentId);
-        if( stu == null ) {
+        if( user == null ) {
             return new HttpResponseWrapperUtil(null, -1, "failure");
         }
         Map<String,Object> data = new HashMap<>();
-        data.put("email",stu.getEmail());
-        data.put("studentName",stu.getStudentName());
-        data.put("studentNumber",stu.getStudentNumber());
-        data.put("departmentId",stu.getDepartmentId());
-        data.put("introduction",stu.getIntroduction());
+        data.put("email",user.getEmail());
+        data.put("userName",user.getUserName());
+        data.put("userNumber",user.getUserNumber());
+        data.put("departmentId",user.getDepartmentId());
+        data.put("introduction",user.getIntroduction());
         return new HttpResponseWrapperUtil(data);
     }
 
-    @ApiOperation("查看教师信息接口")
-    @RequestMapping(value = "/getTeacherInfo/{teacherId}", method = RequestMethod.GET)
-    public HttpResponseWrapperUtil getTeacherInfo(@PathVariable("teacherId") int teacherId){
-        Teacher teacher = teacherService.getTeacherById(teacherId);
-        if( teacher == null ) {
-            return new HttpResponseWrapperUtil(null, -1, "failure");
+    @ApiOperation("用户修改个人信息接口")
+    @RequestMapping(value = "/updateUserInfo/{tag}", method = RequestMethod.POST)
+    public HttpResponseWrapperUtil updateUserInfo(@RequestBody User user, @PathVariable("tag") int tag){
+        User newUser = null;
+        if( tag == 0 ){
+            studentService.updateStudent(new Student(user));
+            newUser = studentService.getStudentById(user.getUserId());
+        }else if( tag == 1 ){
+            teacherService.updateTeacher(new Teacher(user));
+            newUser = teacherService.getTeacherById(user.getUserId());
+        }else{
+            return new HttpResponseWrapperUtil(null, -1, "tag参数错误");
         }
-        Map<String,Object> data = new HashMap<>();
-        data.put("email",teacher.getEmail());
-        data.put("teacherName",teacher.getTeacherName());
-        data.put("teacherNumber",teacher.getTeacherNumber());
-        data.put("departmentId",teacher.getDepartmentId());
-        data.put("introduction",teacher.getIntroduction());
-        return new HttpResponseWrapperUtil(data);
-    }
-
-    @ApiOperation("学生修改个人信息接口")
-    @RequestMapping(value = "/updateStudentInfo", method = RequestMethod.POST)
-    public HttpResponseWrapperUtil updateStudentInfo(@RequestBody Student stu){
-        studentService.updateStudent(stu);
-        Student newStu = studentService.getStudentById(stu.getStudentId());
-        if( newStu == null ) {
+        if( newUser == null ) {
             return new HttpResponseWrapperUtil(null, -1, "该用户不存在");
         }
         Map<String,Object> data = new HashMap<>();
-        data.put("studentId",newStu.getStudentId());
-        data.put("studentName",newStu.getStudentName());
-        data.put("studentNumber",newStu.getStudentNumber());
-        data.put("departmentId",newStu.getDepartmentId());
-        data.put("introduction",newStu.getIntroduction());
+        data.put("userId",newUser.getUserId());
+        data.put("userName",newUser.getUserName());
+        data.put("userNumber",newUser.getUserNumber());
+        data.put("departmentId",newUser.getDepartmentId());
+        data.put("introduction",newUser.getIntroduction());
         return new HttpResponseWrapperUtil(data);
     }
 
-    @ApiOperation("教师修改个人信息接口")
-    @RequestMapping(value = "/updateTeacherInfo", method = RequestMethod.POST)
-    public HttpResponseWrapperUtil updateTeacherInfo(@RequestBody Teacher teacher){
-        teacherService.updateTeacher(teacher);
-        Teacher newTeacher = teacherService.getTeacherById(teacher.getTeacherId());
-        if( newTeacher == null ) {
+    @ApiOperation("用户修改密码接口")
+    @RequestMapping(value = "/resetUserPassword/{tag}", method = RequestMethod.POST)
+    public HttpResponseWrapperUtil resetUserPassword(@PathVariable("tag") int tag,
+                                                     @RequestParam(value = "userId") long userId,
+                                                     @RequestParam(value = "oldPassword") String oldPassword,
+                                                     @RequestParam(value = "newPassword") String newPassword){
+        User user = null;
+        if( tag == 0 ){
+            user = studentService.getStudentById(userId);
+        }else if( tag == 1 ){
+            user = teacherService.getTeacherById(userId);
+        }else{
+            return new HttpResponseWrapperUtil(null, -1, "tag参数错误");
+        }
+        if( user == null ){
             return new HttpResponseWrapperUtil(null, -1, "该用户不存在");
         }
-        Map<String,Object> data = new HashMap<>();
-        data.put("teacherId",newTeacher.getTeacherId());
-        data.put("teacherName",newTeacher.getTeacherName());
-        data.put("teacherNumber",newTeacher.getTeacherNumber());
-        data.put("departmentId",newTeacher.getDepartmentId());
-        data.put("introduction",newTeacher.getIntroduction());
-        return new HttpResponseWrapperUtil(data);
-    }
-
-    @ApiOperation("学生修改密码接口")
-    @RequestMapping(value = "/resetStudentPassword", method = RequestMethod.POST)
-    public HttpResponseWrapperUtil resetStudentPassword(@RequestParam(value = "studentId") long studentId,
-                                                         @RequestParam(value = "oldPassword") String oldPassword,
-                                                         @RequestParam(value = "newPassword") String newPassword){
-        Student stu = studentService.getStudentById(studentId);
-        if( stu == null ){
-            return new HttpResponseWrapperUtil(null, -1, "该用户不存在");
-        }
-        if( !MD5Util.verifyMD5(oldPassword, stu.getPassword()) ){
+        if( !MD5Util.verifyMD5(oldPassword, user.getPassword()) ){
             return new HttpResponseWrapperUtil(null, -1, "旧密码输入错误");
         }
         if( oldPassword.equals(newPassword) ){
             return new HttpResponseWrapperUtil(null, -1, "新密码与旧密码不能相同");
         }
-        stu.setPassword(MD5Util.encryptedByMD5(newPassword));
-        studentService.resetPassword(stu);
-        return new HttpResponseWrapperUtil(null);
-    }
-
-    @ApiOperation("教师修改密码接口")
-    @RequestMapping(value = "/resetTeacherPassword", method = RequestMethod.POST)
-    public HttpResponseWrapperUtil resetTeacherPassword(@RequestParam(value = "teacherId") int teacherId,
-                                                        @RequestParam(value = "oldPassword") String oldPassword,
-                                                        @RequestParam(value = "newPassword") String newPassword){
-        Teacher teacher = teacherService.getTeacherById(teacherId);
-        if( teacher == null ){
-            return new HttpResponseWrapperUtil(null, -1, "该用户不存在");
+        user.setPassword(MD5Util.encryptedByMD5(newPassword));
+        if( tag == 0 ){
+            studentService.resetPassword((Student)user);
+        }else{
+            teacherService.resetPassword((Teacher)user);
         }
-        if( !MD5Util.verifyMD5(oldPassword, teacher.getPassword()) ){
-            return new HttpResponseWrapperUtil(null, -1, "旧密码输入错误");
-        }
-        if( oldPassword.equals(newPassword) ){
-            return new HttpResponseWrapperUtil(null, -1, "新密码与旧密码不能相同");
-        }
-        teacher.setPassword(MD5Util.encryptedByMD5(newPassword));
-        teacherService.resetPassword(teacher);
         return new HttpResponseWrapperUtil(null);
     }
 

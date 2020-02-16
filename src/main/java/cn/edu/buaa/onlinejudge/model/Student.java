@@ -1,37 +1,6 @@
 package cn.edu.buaa.onlinejudge.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
-public class Student {
-    /**
-     * 学生的唯一标识符
-     */
-    private long studentId;
-
-    /**
-     * 学生邮箱
-     */
-    private String email;
-
-    /**
-     * 学生姓名
-     */
-    private String studentName;
-
-    /**
-     * 学号
-     */
-    private String studentNumber;
-
-    /**
-     * 学生账号密码
-     */
-    private String password;
-
-    /**
-     * 学生所属院系ID
-     */
-    private int departmentId;
+public class Student extends User{
 
     /**
      * 学生偏好语言ID，默认为1(Python 3)
@@ -39,78 +8,27 @@ public class Student {
     private int preferLanguageId = 1;
 
     /**
-     * 学生个人简介
-     */
-    private String introduction;
-
-    /**
-     * 学生登录验证码
-     */
-    private String verifyCode;
-
-    /**
      * 学生的无参构造方法
      */
-    public Student() { }
+    public Student() {
+        super();
+    }
 
-    public Student(long studentId, String email, String studentName, String studentNumber, String password, int departmentId, int preferLanguageId, String introduction, String verifyCode) {
-        this.studentId = studentId;
-        this.email = email;
-        this.studentName = studentName;
-        this.studentNumber = studentNumber;
-        this.password = password;
-        this.departmentId = departmentId;
+    /**
+     * 通过父类对象构造子类
+     * @param user - 父类对象
+     */
+    public Student(User user){
+        super(user.getUserId(),user.getEmail(),user.getUserName(),user.getUserNumber(),user.getPassword(),user.getDepartmentId(),user.getIntroduction(),user.getVerifyCode());
+    }
+
+    public Student(int preferLanguageId) {
         this.preferLanguageId = preferLanguageId;
-        this.introduction = introduction;
-        this.verifyCode = verifyCode;
     }
 
-    public long getStudentId() {
-        return studentId;
-    }
-
-    public void setStudentId(long studentId) {
-        this.studentId = studentId;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getStudentName() {
-        return studentName;
-    }
-
-    public void setStudentName(String studentName) {
-        this.studentName = studentName;
-    }
-
-    public String getStudentNumber() {
-        return studentNumber;
-    }
-
-    public void setStudentNumber(String studentNumber) {
-        this.studentNumber = studentNumber;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public int getDepartmentId() {
-        return departmentId;
-    }
-
-    public void setDepartmentId(int departmentId) {
-        this.departmentId = departmentId;
+    public Student(long userId, String email, String userName, String userNumber, String password, int departmentId, String introduction, String verifyCode, int preferLanguageId) {
+        super(userId, email, userName, userNumber, password, departmentId, introduction, verifyCode);
+        this.preferLanguageId = preferLanguageId;
     }
 
     public int getPreferLanguageId() {
@@ -119,36 +37,5 @@ public class Student {
 
     public void setPreferLanguageId(int preferLanguageId) {
         this.preferLanguageId = preferLanguageId;
-    }
-
-    public String getIntroduction() {
-        return introduction;
-    }
-
-    public void setIntroduction(String introduction) {
-        this.introduction = introduction;
-    }
-
-    public String getVerifyCode() {
-        return verifyCode;
-    }
-
-    public void setVerifyCode(String verifyCode) {
-        this.verifyCode = verifyCode;
-    }
-
-    @Override
-    public String toString() {
-        return "Student{" +
-                "studentId=" + studentId +
-                ", email='" + email + '\'' +
-                ", studentName='" + studentName + '\'' +
-                ", studentNumber='" + studentNumber + '\'' +
-                ", password='" + password + '\'' +
-                ", departmentId=" + departmentId +
-                ", preferLanguageId=" + preferLanguageId +
-                ", introduction='" + introduction + '\'' +
-                ", verifyCode='" + verifyCode + '\'' +
-                '}';
     }
 }

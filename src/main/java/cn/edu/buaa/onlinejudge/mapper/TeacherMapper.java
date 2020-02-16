@@ -11,7 +11,7 @@ public interface TeacherMapper {
      * @param teacherId - 教师ID
      * @return Teacher对象
      */
-    Teacher getTeacherById(int teacherId);
+    Teacher getTeacherById(long teacherId);
 
     /**
      * 根据邮箱（账号）获取教师对象

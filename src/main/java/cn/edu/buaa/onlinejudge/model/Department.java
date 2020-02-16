@@ -2,7 +2,7 @@ package cn.edu.buaa.onlinejudge.model;
 
 public class Department {
     /**
-     * 院系的唯一标识符
+     * 院系ID
      */
     private int departmentId;
 

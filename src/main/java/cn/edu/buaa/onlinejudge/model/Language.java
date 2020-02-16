@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class Language {
     /**
-     * 编程语言唯一标识符
+     * 编程语言ID
      */
     private int languageId;
 
