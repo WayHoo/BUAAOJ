@@ -11,10 +11,7 @@ import cn.edu.buaa.onlinejudge.utils.HttpResponseWrapperUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -37,7 +34,7 @@ public class ContestController {
     private ProblemService problemService;
 
     @ApiOperation("学生查看课程竞赛接口")
-    @RequestMapping(value = "/getContestsOfCourse/{courseId}", method = RequestMethod.GET)
+    @GetMapping(value = "/getContestsOfCourse/{courseId}")
     public HttpResponseWrapperUtil getContestsOfCourse(@PathVariable("courseId") int courseId) {
         Course course = courseService.getCourseById(courseId);
         if( course == null ){
@@ -49,7 +46,7 @@ public class ContestController {
     }
 
     @ApiOperation("学生通过分页查看所有竞赛接口")
-    @RequestMapping(value = "/getPageContests/{pageSize}/{pageIndex}", method = RequestMethod.GET)
+    @GetMapping(value = "/getPageContests/{pageSize}/{pageIndex}")
     public HttpResponseWrapperUtil getPageContests(@PathVariable("pageSize") int pageSize,
                                                    @PathVariable("pageIndex") int pageIndex) {
         if( pageSize < 0 || pageIndex < 0 ) {
@@ -62,7 +59,7 @@ public class ContestController {
     }
 
     @ApiOperation("学生进入竞赛接口")
-    @RequestMapping(value = "/enterContest/{contestId}", method = RequestMethod.GET)
+    @GetMapping(value = "/enterContest/{contestId}")
     public HttpResponseWrapperUtil enterContest(@PathVariable("contestId") int contestId) {
         Contest contest = contestService.getContestById(contestId);
         if( contest == null || !contest.isVisible() || !contest.isAnswerable() ||

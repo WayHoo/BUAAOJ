@@ -12,12 +12,33 @@
         <result property="teacherId" column="teacher_id"></result>
         <result property="coursewareUrl" column="courseware_url"></result>
     </resultMap>
-    
+
     <select id="getAllCourses" resultMap="CourseResultMap" useCache="true">
         SELECT * FROM courses ORDER BY course_id ASC;
+    </select>
+
+    <select id="getAllCoursesByTeacherId" parameterType="long" resultMap="CourseResultMap" useCache="true">
+        SELECT * FROM courses WHERE teacher_id = #{teacherId}
+        ORDER BY course_id ASC;
     </select>
 
     <select id="getCourseById" parameterType="int" resultMap="CourseResultMap" useCache="true">
         SELECT * FROM courses WHERE course_id = #{courseId};
     </select>
+
+    <insert id="insertCourse" parameterType="Course" useGeneratedKeys="true"
+            keyProperty="courseId" keyColumn="course_id" flushCache="true">
+        INSERT INTO courses (course_name, introduction, teacher_id, courseware_url)
+        VALUES (#{courseName}, #{introduction}, #{teacherId}, #{coursewareUrl});
+    </insert>
+    
+    <update id="updateCourse" parameterType="Course" flushCache="true">
+        update courses
+        <set>
+            <if test="courseName != null and courseName.length() > 0">course_name = #{courseName}</if>
+            <if test="coursewareUrl != null> 0">courseware_url = #{coursewareUrl}</if>
+            <if test="introduction != null">introduction = #{introduction}</if>
+        </set>
+        WHERE course_id = #{courseId};
+    </update>
 </mapper>

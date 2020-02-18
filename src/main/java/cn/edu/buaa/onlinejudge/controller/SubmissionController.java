@@ -39,7 +39,7 @@ public class SubmissionController {
     private LanguageService languageService;
 
     @ApiOperation("查看学生对指定题目的提交记录接口")
-    @RequestMapping(value = "/getProblemSubmissionsOfStudent/{studentId}/{problemId}", method = RequestMethod.GET)
+    @GetMapping(value = "/getProblemSubmissionsOfStudent/{studentId}/{problemId}")
     public HttpResponseWrapperUtil getProblemSubmissionsOfStudent(@PathVariable("studentId") long studentId,
                                                          @PathVariable("problemId") long problemId) {
         List<Submission> submissionList = submissionService.getSubmissionsByStudentIdAndProblemId(studentId,problemId);
@@ -54,16 +54,12 @@ public class SubmissionController {
     }
 
     @ApiOperation("查看学生对指定竞赛的提交记录接口")
-    @RequestMapping(value = "/getContestSubmissionsOfStudent/{studentId}/{contestId}", method = RequestMethod.GET)
+    @GetMapping(value = "/getContestSubmissionsOfStudent/{studentId}/{contestId}")
     public HttpResponseWrapperUtil getContestSubmissionsOfStudent(@PathVariable("studentId") long studentId,
                                                                   @PathVariable("contestId") int contestId) {
-        Contest contest = contestService.getContestById(contestId);
         List<Long> problemIdList = problemService.getProblemIdListOfContest(contestId);
         List<Submission> submissionList = submissionService.getSubmissionsByStudentIdAndProblemIdList(studentId,problemIdList);
-        Map<String,Object> data = new HashMap<>();
-        data.put("finishTime", DateUtil.formatTimestamp(contest.getFinishTime()));
-        data.put("serverCurrentTime",DateUtil.getCurrentTime());
-        List<Object> submitRecords = new ArrayList<>();
+        List<Object> data = new ArrayList<>();
         if( submissionList != null ) {
             for (Submission submission : submissionList) {
                 Map<String,Object> metadata = wrapSubmission2Json(submission);
@@ -82,15 +78,14 @@ public class SubmissionController {
                     metadata.put("codeLength",String.format("%.1f",codeLength));
                 }
                 metadata.put("submitTime",DateUtil.formatTimestamp(submission.getSubmitTime()));
-                submitRecords.add(metadata);
+                data.add(metadata);
             }
         }
-        data.put("submitRecords",submitRecords);
         return new HttpResponseWrapperUtil(data);
     }
 
     @ApiOperation("学生提交代码接口")
-    @RequestMapping(value = "/submitCode", method = RequestMethod.POST)
+    @PostMapping(value = "/submitCode")
     public HttpResponseWrapperUtil submitCode(@RequestBody Submission submission) {
         submission.setSubmitTime(DateUtil.getCurrentTimestamp());
         submissionService.insertSubmission(submission);

@@ -37,7 +37,7 @@ public class ProblemController {
     private CourseService courseService;
 
     @ApiOperation("根据题目ID查看题目接口")
-    @RequestMapping(value = "/getProblemById/{studentId}/{problemId}", method = RequestMethod.GET)
+    @GetMapping(value = "/getProblemById/{studentId}/{problemId}")
     public HttpResponseWrapperUtil getProblemById(@PathVariable("studentId") long studentId,
                                                   @PathVariable("problemId") long problemId) {
         Problem problem = problemService.getProblemById(problemId);
@@ -65,7 +65,7 @@ public class ProblemController {
     }
 
     @ApiOperation("学生查看题库接口")
-    @RequestMapping(value = "/getPageProblems/{pageSize}/{pageIndex}/{studentId}", method = RequestMethod.GET)
+    @GetMapping(value = "/getPageProblems/{pageSize}/{pageIndex}/{studentId}")
     public HttpResponseWrapperUtil getPageProblems(@PathVariable("pageSize") int pageSize,
                                                    @PathVariable("pageIndex") int pageIndex,
                                                    @PathVariable("studentId") long studentId) {
@@ -96,7 +96,7 @@ public class ProblemController {
     }
 
     @ApiOperation("学生查看课程题库接口")
-    @RequestMapping(value = "/getProblemsOfCourse/{courseId}", method = RequestMethod.GET)
+    @GetMapping(value = "/getProblemsOfCourse/{courseId}")
     public HttpResponseWrapperUtil getProblemsOfCourse(@PathVariable("courseId") int courseId) {
         Course course = courseService.getCourseById(courseId);
         if( course == null ){

@@ -29,6 +29,10 @@ public class CourseService {
         return courseMapper.getAllCourses();
     }
 
+    public List<Course> getCoursesOfTeacher(long teacherId){
+        return courseMapper.getAllCoursesByTeacherId(teacherId);
+    }
+
     public Course getCourseById(int courseId) {
         return courseMapper.getCourseById(courseId);
     }
@@ -77,5 +81,13 @@ public class CourseService {
 
     public List<Integer> getStudentJoinedCourseIdList(long studentId) {
         return courseStudentRelationshipMapper.getStudentJoinedCourseIdList(studentId);
+    }
+
+    public void insertCourse(Course course){
+        courseMapper.insertCourse(course);
+    }
+
+    public void updateCourse(Course course){
+        courseMapper.updateCourse(course);
     }
 }

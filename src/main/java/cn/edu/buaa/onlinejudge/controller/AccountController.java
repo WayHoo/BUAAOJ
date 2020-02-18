@@ -31,7 +31,7 @@ public class AccountController {
     private TeacherService teacherService;
 
     @ApiOperation(value = "生成图片验证码接口")
-    @RequestMapping(value = "/getImgVerifyCode", method = RequestMethod.GET)
+    @GetMapping(value = "/getImgVerifyCode")
     public void getImgVerifyCode(HttpSession session, HttpServletResponse response) {
         response.setHeader("Pragma", "No-cache");
         response.setHeader("Cache-Control", "no-cache");
@@ -57,7 +57,7 @@ public class AccountController {
      * @return JSON数据
      */
     @ApiOperation(value = "用户（学生和教师）登录接口")
-    @RequestMapping(value = "/login/{tag}", method = RequestMethod.POST)
+    @PostMapping(value = "/login/{tag}")
     public HttpResponseWrapperUtil login(@RequestBody User user, @PathVariable("tag") int tag, HttpSession session) {
         String codeInSession = (String) session.getAttribute("verifyCode");
         if( !checkVerifyCode(codeInSession, user.getVerifyCode()) ) {
@@ -91,7 +91,7 @@ public class AccountController {
      * @return JSON数据
      */
     @ApiOperation("用户（学生和教师）注册接口")
-    @RequestMapping(value = "/register/{tag}", method = RequestMethod.POST)
+    @PostMapping(value = "/register/{tag}")
     public HttpResponseWrapperUtil register(@RequestBody User user, @PathVariable("tag") int tag, HttpSession session){
         User realUser = null;
         if( tag == 0 ){
@@ -124,7 +124,7 @@ public class AccountController {
     }
 
     @ApiOperation("查看用户信息接口")
-    @RequestMapping(value = "/getUserInfo/{tag}/{userId}", method = RequestMethod.GET)
+    @GetMapping(value = "/getUserInfo/{tag}/{userId}")
     public HttpResponseWrapperUtil getUserInfo(@PathVariable("tag") int tag, @PathVariable("userId") long userId){
         User user = null;
         if( tag == 0 ){
@@ -147,7 +147,7 @@ public class AccountController {
     }
 
     @ApiOperation("用户修改个人信息接口")
-    @RequestMapping(value = "/updateUserInfo/{tag}", method = RequestMethod.POST)
+    @PostMapping(value = "/updateUserInfo/{tag}")
     public HttpResponseWrapperUtil updateUserInfo(@RequestBody User user, @PathVariable("tag") int tag){
         User newUser = null;
         if( tag == 0 ){
@@ -172,7 +172,7 @@ public class AccountController {
     }
 
     @ApiOperation("用户修改密码接口")
-    @RequestMapping(value = "/resetUserPassword/{tag}", method = RequestMethod.POST)
+    @PostMapping(value = "/resetUserPassword/{tag}")
     public HttpResponseWrapperUtil resetUserPassword(@PathVariable("tag") int tag,
                                                      @RequestParam(value = "userId") long userId,
                                                      @RequestParam(value = "oldPassword") String oldPassword,

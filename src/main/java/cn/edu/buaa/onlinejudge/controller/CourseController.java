@@ -7,10 +7,7 @@ import cn.edu.buaa.onlinejudge.utils.HttpResponseWrapperUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
@@ -18,31 +15,45 @@ import java.util.*;
 @RestController
 @RequestMapping(value = "BUAAOJ/courses")
 public class CourseController {
+
     @Autowired
     private CourseService courseService;
 
     @Autowired
     private StudentService studentService;
 
-    @ApiOperation("查看所有课程接口")
-    @RequestMapping(value = "/getAllCourses", method = RequestMethod.GET)
+    @ApiOperation("学生查看所有课程接口")
+    @GetMapping(value = "/getAllCourses")
     public HttpResponseWrapperUtil getAllCourses() {
         List<Course> allCourses = courseService.getAllCourses();
-        if( allCourses == null ){
-            return new HttpResponseWrapperUtil(null, -1, "failure");
-        }
-        List<Object> data = new ArrayList<>();
-        for (Course course : allCourses) {
-            Map<String,Object> metadata = new HashMap<>();
-            metadata.put("courseId", course.getCourseId());
-            metadata.put("courseName", course.getCourseName());
-            data.add(metadata);
-        }
+        return wrapCourseList2JSON(allCourses);
+    }
+
+    @ApiOperation("教师查看所有课程接口")
+    @GetMapping(value = "/getCoursesOfTeacher/{teacherId}")
+    public HttpResponseWrapperUtil getCoursesOfTeacher(@PathVariable("teacherId") long teacherId) {
+        List<Course> courses = courseService.getCoursesOfTeacher(teacherId);
+        return wrapCourseList2JSON(courses);
+    }
+
+    @ApiOperation("教师新建课程接口")
+    @PostMapping(value = "/createCourse")
+    public HttpResponseWrapperUtil createCourse(@RequestBody Course course) {
+        courseService.insertCourse(course);
+        Map<String,Object> data = new HashMap<>();
+        data.put("courseId", course.getCourseId());
         return new HttpResponseWrapperUtil(data);
     }
 
+    @ApiOperation("教师修改课程信息")
+    @PostMapping(value = "/updateCourse")
+    public HttpResponseWrapperUtil updateCourseIntro(@RequestBody Course course) {
+        courseService.updateCourse(course);
+        return new HttpResponseWrapperUtil(null);
+    }
+
     @ApiOperation("学生查看课程主页接口")
-    @RequestMapping(value = "/getCourseHomepage/{studentId}/{courseId}", method = RequestMethod.GET)
+    @GetMapping(value = "/getCourseHomepage/{studentId}/{courseId}")
     public HttpResponseWrapperUtil getCourseHomepage(@PathVariable("studentId") long studentId,
                                                      @PathVariable("courseId") int courseId) {
         Course course = courseService.getCourseById(courseId);
@@ -58,7 +69,7 @@ public class CourseController {
     }
 
     @ApiOperation("学生申请加入课程接口")
-    @RequestMapping(value = "/joinCourse/{studentId}/{courseId}", method = RequestMethod.GET)
+    @GetMapping(value = "/joinCourse/{studentId}/{courseId}")
     public HttpResponseWrapperUtil joinCourse(@PathVariable("studentId") long studentId,
                                                      @PathVariable("courseId") int courseId) {
         Map<String,Object> map = wrapCourseStudentRelationship2Json(studentId,courseId);
@@ -74,7 +85,7 @@ public class CourseController {
     }
 
     @ApiOperation("学生查看课程成员接口")
-    @RequestMapping(value = "/getCourseMembers/{studentId}/{courseId}", method = RequestMethod.GET)
+    @GetMapping(value = "/getCourseMembers/{studentId}/{courseId}")
     public HttpResponseWrapperUtil getCourseMembers(@PathVariable("studentId") long studentId,
                                               @PathVariable("courseId") int courseId) {
         Map<String,Object> map = wrapCourseStudentRelationship2Json(studentId,courseId);
@@ -109,5 +120,24 @@ public class CourseController {
         }
         result.put("status",courseService.isStudentJoinCourse(studentId,courseId));
         return result;
+    }
+
+    /**
+     * 将课程对象列表基本信息封装成JSON数据
+     * @param courseList - 课程对象列表
+     * @return JSON数据
+     */
+    public HttpResponseWrapperUtil wrapCourseList2JSON(List<Course> courseList){
+        if( courseList == null ){
+            return new HttpResponseWrapperUtil(null, -1, "failure");
+        }
+        List<Object> data = new ArrayList<>();
+        for (Course course : courseList) {
+            Map<String,Object> metadata = new HashMap<>();
+            metadata.put("courseId", course.getCourseId());
+            metadata.put("courseName", course.getCourseName());
+            data.add(metadata);
+        }
+        return new HttpResponseWrapperUtil(data);
     }
 }
