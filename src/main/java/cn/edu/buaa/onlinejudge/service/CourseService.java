@@ -6,9 +6,11 @@ import cn.edu.buaa.onlinejudge.mapper.StudentMapper;
 import cn.edu.buaa.onlinejudge.model.Course;
 import cn.edu.buaa.onlinejudge.model.CourseStudentRelationship;
 import cn.edu.buaa.onlinejudge.model.Student;
+import cn.edu.buaa.onlinejudge.utils.FileUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -89,5 +91,16 @@ public class CourseService {
 
     public void updateCourse(Course course){
         courseMapper.updateCourse(course);
+    }
+
+    /**
+     * 判断课程是否有课件供下载
+     * @param courseId - 课程ID
+     * @return
+     */
+    public boolean isCoursewareExists(int courseId){
+        String filePath = FileUtil.getUploadPath(Integer.toString(courseId));
+        File file = new File(filePath + "courseware.zip");
+        return file.exists();
     }
 }

@@ -40,4 +40,28 @@ public class SubmissionService {
     public void insertSubmission(Submission submission){
         submissionMapper.insertSubmission(submission);
     }
+
+    /**
+     * 判断学生答题状态
+     * 答错-1（红色），未答题0（白色），判题中1（灰色），部分正确2（黄色），通过3（绿色）
+     * @param studentId - 学生ID
+     * @param problemId - 题目ID
+     * @return
+     */
+    public int getSubmissionStatus(long studentId,long problemId){
+        Submission submission = submissionMapper.getStudentLatestSubmissionOfProblem(studentId,problemId);
+        int status = 0;
+        if( submission == null ){
+            status = 0;
+        } else if( "PD".equals(submission.getJudgeResult()) ){
+            status = 1;
+        } if( "AC".equals(submission.getJudgeResult()) ){
+            status = 3;
+        } else if( submission.getJudgeScore() > 0 ){
+            status = 2;
+        } else{
+            status = -1;
+        }
+        return status;
+    }
 }

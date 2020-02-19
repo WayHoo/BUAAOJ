@@ -6,6 +6,7 @@ import cn.edu.buaa.onlinejudge.model.Problem;
 import cn.edu.buaa.onlinejudge.service.ContestService;
 import cn.edu.buaa.onlinejudge.service.CourseService;
 import cn.edu.buaa.onlinejudge.service.ProblemService;
+import cn.edu.buaa.onlinejudge.service.SubmissionService;
 import cn.edu.buaa.onlinejudge.utils.DateUtil;
 import cn.edu.buaa.onlinejudge.utils.HttpResponseWrapperUtil;
 import io.swagger.annotations.Api;
@@ -33,6 +34,9 @@ public class ContestController {
     @Autowired
     private ProblemService problemService;
 
+    @Autowired
+    private SubmissionService submissionService;
+
     @ApiOperation("学生查看课程竞赛接口")
     @GetMapping(value = "/getContestsOfCourse/{courseId}")
     public HttpResponseWrapperUtil getContestsOfCourse(@PathVariable("courseId") int courseId) {
@@ -59,8 +63,9 @@ public class ContestController {
     }
 
     @ApiOperation("学生进入竞赛接口")
-    @GetMapping(value = "/enterContest/{contestId}")
-    public HttpResponseWrapperUtil enterContest(@PathVariable("contestId") int contestId) {
+    @GetMapping(value = "/enterContest/{studentId}/{contestId}")
+    public HttpResponseWrapperUtil enterContest(@PathVariable("studentId") long studentId,
+                                                @PathVariable("contestId") int contestId) {
         Contest contest = contestService.getContestById(contestId);
         if( contest == null || !contest.isVisible() || !contest.isAnswerable() ||
                 DateUtil.getCurrentTimestamp().before(contest.getStartTime())){
@@ -72,9 +77,12 @@ public class ContestController {
         data.put("contestStatus",judgeContestStatus(contest.getStartTime(),contest.getFinishTime()));
         data.put("serverCurrentTime",DateUtil.getCurrentTime());
         List<Problem> problemList = problemService.getProblemsOfContest(contestId);
-        List<Long> problemIdList = new ArrayList<>();
+        List<Object> problemIdList = new ArrayList<>();
         for (Problem problem : problemList) {
-            problemIdList.add(problem.getProblemId());
+            Map<String,Object> metadata = new HashMap<>();
+            metadata.put("problemId",problem.getProblemId());
+            metadata.put("status",submissionService.getSubmissionStatus(studentId,problem.getProblemId()));
+            problemIdList.add(metadata);
         }
         data.put("problemIdList",problemIdList);
         return new HttpResponseWrapperUtil(data);

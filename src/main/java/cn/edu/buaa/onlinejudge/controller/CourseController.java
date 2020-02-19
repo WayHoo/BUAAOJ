@@ -62,7 +62,7 @@ public class CourseController {
         }
         Map<String,Object> data = new HashMap<>();
         data.put("introduction", course.getIntroduction());
-        data.put("coursewareUrl", course.getCoursewareUrl());
+        data.put("downloadable", courseService.isCoursewareExists(courseId) ? 1 : 0);
         int status = courseService.isStudentJoinCourse(studentId,courseId);
         data.put("isStudentAccept", status);
         return new HttpResponseWrapperUtil(data);

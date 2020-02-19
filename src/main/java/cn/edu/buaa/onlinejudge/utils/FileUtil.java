@@ -2,20 +2,37 @@ package cn.edu.buaa.onlinejudge.utils;
 
 import org.springframework.util.ResourceUtils;
 
-import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.*;
 
 public class FileUtil {
     private static final String UPLOAD_DIR_IN_WINDOWS = "D:\\resources\\";
     private static final String UPLOAD_RELATIVE_DIR_IN_LINUX = "/upload/courseware/";
 
-    public static String getUploadPath(){
+    /**
+     * 获取上传文件存放的绝对路径
+     * @param subDirName - 子目录名
+     * @return
+     */
+    public static String getUploadPath(String subDirName){
         String systemName = System.getProperty("os.name").toLowerCase();
-        String uploadPath = UPLOAD_DIR_IN_WINDOWS;
+        String uploadPath = UPLOAD_DIR_IN_WINDOWS + subDirName + "\\";
         if(systemName.contains("linux")){
-            uploadPath = getProjectRootDir() + UPLOAD_RELATIVE_DIR_IN_LINUX;
+            uploadPath = getProjectRootDir() + UPLOAD_RELATIVE_DIR_IN_LINUX + subDirName + "/";
         }
         return uploadPath;
+    }
+
+    /**
+     * 获取项目在Linux或Windows（默认）系统运行时的临时文件夹路径
+     * @return
+     */
+    public static String getTmpDirPath(){
+        String systemName = System.getProperty("os.name").toLowerCase();
+        if(systemName.contains("linux")){
+            return "/tmp/";
+        }else{
+            return "D:\\tmp\\";
+        }
     }
 
     /**
@@ -75,5 +92,25 @@ public class FileUtil {
             if( !dest.exists() ) break;
         }
         return dest;
+    }
+
+    /**
+     * 拷贝文件
+     * @param oldPath - 源资源文件绝对路径（如"/tmp/file.zip"）
+     * @param newPath - 目的资源文件绝对路径(如"/home/file.zip")
+     * @throws IOException
+     */
+    public static void removeFile(String oldPath, String newPath) throws IOException {
+        File oldFile = new File(oldPath);
+        File newFile = new File(newPath);
+        FileInputStream in = new FileInputStream(oldFile);
+        FileOutputStream out = new FileOutputStream(newFile);;
+        byte[] buffer=new byte[1024];
+        while((in.read(buffer)) != -1){
+            out.write(buffer);
+        }
+        in.close();
+        out.close();
+        oldFile.delete();
     }
 }
