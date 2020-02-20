@@ -25,12 +25,23 @@
         VALUES (#{courseId}, #{studentId}, #{isStudentAccept}, #{studentRole});
     </insert>
     
-    <select id="getCourseMembers" parameterType="int" resultMap="CourseStudentRelationshipResultMap" useCache="true">
-        SELECT * FROM course_student_relationships WHERE course_id = #{courseId} AND is_student_accept = 1;
+    <select id="getCourseMembers" parameterType="Map" resultMap="CourseStudentRelationshipResultMap" useCache="true">
+        SELECT * FROM course_student_relationships WHERE course_id = #{courseId} AND is_student_accept = #{tag};
     </select>
     
     <select id="getStudentJoinedCourseIdList" parameterType="long" resultType="int" useCache="true">
-        SELECT course_id FROM course_student_relationships WHERE student_id = #{studentId} AND is_student_accept = 1;
+        SELECT course_id FROM course_student_relationships
+        WHERE student_id = #{studentId} AND is_student_accept = 1;
     </select>
+    
+    <update id="updateCourseMemberRole" parameterType="Map" flushCache="true">
+        UPDATE course_student_relationships SET student_role = #{role}
+        WHERE course_id = #{courseId} AND student_id = #{studentId};
+    </update>
+
+    <update id="auditStudent" parameterType="Map" flushCache="true">
+        UPDATE course_student_relationships SET is_student_accept = #{isStudentAccept}
+        WHERE course_id = #{courseId} AND student_id = #{studentId};
+    </update>
 
 </mapper>

@@ -20,8 +20,12 @@
         SELECT * FROM contests WHERE contest_id = #{contestId};
     </select>
 
-    <select id="getContestsOfCourse" parameterType="int" resultMap="ContestResultMap" useCache="true">
+    <select id="getVisibleContestsOfCourse" parameterType="int" resultMap="ContestResultMap" useCache="true">
         SELECT * FROM contests WHERE course_id = #{courseId} AND visibility = 1 ORDER BY contest_id ASC;
+    </select>
+
+    <select id="getAllContestsOfCourse" parameterType="int" resultMap="ContestResultMap" useCache="true">
+        SELECT * FROM contests WHERE course_id = #{courseId} ORDER BY contest_id ASC;
     </select>
     
     <select id="getTotalContestsNum" resultType="int" useCache="true">
@@ -46,4 +50,29 @@
             </otherwise>
         </choose>
     </select>
+
+    <insert id="insertContest" parameterType="Contest" flushCache="true"
+            useGeneratedKeys="true" keyProperty="contestId" keyColumn="contest_id">
+        INSERT INTO contests (contest_name, course_id, start_time, finish_time, introduction)
+        VALUES (#{contestName}, #{courseId}, #{startTime}, #{finishTime}, #{introduction});
+    </insert>
+
+    <update id="setContestVisibility" parameterType="Map" flushCache="true">
+        UPDATE contests SET visibility = #{visibility} WHERE contest_id = #{contestId};
+    </update>
+
+    <update id="setContestStatus" parameterType="Map" flushCache="true">
+        UPDATE contests SET status = #{status} WHERE contest_id = #{contestId};
+    </update>
+
+    <update id="updateContest" parameterType="Contest" flushCache="true">
+        UPDATE contests
+        <set>
+            <if test="contestName != null and contestName.length() > 0">contest_name = #{contestName},</if>
+            <if test="introduction != null">introduction = #{introduction},</if>
+            start_time = #{startTime},
+            finish_time = #{finishTime}
+        </set>
+        WHERE contest_id = #{contestId};
+    </update>
 </mapper>

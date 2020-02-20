@@ -18,12 +18,18 @@ public interface ContestMapper {
     Contest getContestById(int contestId);
 
     /**
-     * 查看课程下的所有竞赛
+     * 查看课程下的所有可见的竞赛
      * @param courseId - 课程ID
      * @return Contest对象列表
      */
-    List<Contest> getContestsOfCourse(int courseId);
+    List<Contest> getVisibleContestsOfCourse(int courseId);
 
+    /**
+     * 查看课程下的所有竞赛（包括不可见的竞赛）
+     * @param courseId - 课程ID
+     * @return Contest对象列表
+     */
+    List<Contest> getAllContestsOfCourse(int courseId);
     /**
      * 获取所有竞赛的个数
      * @return 竞赛个数
@@ -44,4 +50,30 @@ public interface ContestMapper {
      * @return 竞赛ID列表
      */
     List<Integer> getContestIdListByCourseIdList(List<Integer> courseIdList);
+
+    /**
+     * 插入竞赛对象
+     * @param contest - 竞赛对象
+     */
+    void insertContest(Contest contest);
+
+    /**
+     * 设置竞赛的可见性
+     * @param contestId - 竞赛ID
+     * @param visibility - 可见性值（可见1，不可见0）
+     */
+    void setContestVisibility(@Param("contestId") int contestId, @Param("visibility") int visibility);
+
+    /**
+     * 设置竞赛的答题状态
+     * @param contestId - 竞赛ID
+     * @param status - 答题状态（可答题1，不可答题0）
+     */
+    void setContestStatus(@Param("contestId") int contestId, @Param("status") int status);
+
+    /**
+     * 更新竞赛信息
+     * @param contest - 竞赛对象
+     */
+    void updateContest(Contest contest);
 }

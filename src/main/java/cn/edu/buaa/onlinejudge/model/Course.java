@@ -22,21 +22,15 @@ public class Course {
     private String introduction;
 
     /**
-     * 课程资源路径
-     */
-    private String coursewareUrl;
-
-    /**
      * 课程的无参构造方法
      */
     public Course() { }
 
-    public Course(int courseId, String courseName, int teacherId, String introduction, String coursewareUrl) {
+    public Course(int courseId, String courseName, int teacherId, String introduction) {
         this.courseId = courseId;
         this.courseName = courseName;
         this.teacherId = teacherId;
         this.introduction = introduction;
-        this.coursewareUrl = coursewareUrl;
     }
 
     public int getCourseId() {
@@ -71,14 +65,6 @@ public class Course {
         this.introduction = introduction;
     }
 
-    public String getCoursewareUrl() {
-        return coursewareUrl;
-    }
-
-    public void setCoursewareUrl(String coursewareUrl) {
-        this.coursewareUrl = coursewareUrl;
-    }
-
     @Override
     public String toString() {
         return "Course{" +
@@ -86,7 +72,6 @@ public class Course {
                 ", courseName='" + courseName + '\'' +
                 ", teacherId=" + teacherId +
                 ", introduction='" + introduction + '\'' +
-                ", coursewareUrl='" + coursewareUrl + '\'' +
                 '}';
     }
 }

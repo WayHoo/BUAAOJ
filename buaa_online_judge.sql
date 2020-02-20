@@ -128,7 +128,7 @@ INSERT INTO `system_administrator` (`system_administrator_id`, `system_administr
 --
 
 -- 字段内容：课程ID（主键）、课程名称（字符串）、课程简介（文本）、
--- 			所属老师ID（连接老师数据表的外键）、课件资源路径（字符串）
+-- 			所属老师ID（连接老师数据表的外键）
 
 --
 -- Table structure for table `courses`
@@ -138,13 +138,12 @@ CREATE TABLE `courses` (
   `course_name` VARCHAR(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `introduction` TEXT COLLATE utf8mb4_unicode_ci,
   `teacher_id` INT NOT NULL,
-  `courseware_url` VARCHAR(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   CONSTRAINT `courses_teachers_fk` FOREIGN KEY (`teacher_id`) REFERENCES `teachers` (`teacher_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-INSERT INTO `courses` (`course_id`, `course_name`, `introduction`, `teacher_id`, `courseware_url`) VALUES
-			(1, '2018级-软件学院-算法设计与分析', '无', 1, NULL),
-			(2, '2019级-中法工程师学院-大学计算机基础', '《软件学院2017级算法分析与设计》，2018秋季学期\n\r上课时间地点: 1-17周四6-7节， J3-311\n\r上机时间地点: 3周周五晚，6-14周双周六3-4节，S7-601, 602, 603 (测试时间地点另行通知)\n\r讲评时间地点: 5-13周单周五11-12节，J3-410\n\r$ 请各位同学在个人信息中填好**真实学号**并将用户昵称改为**真实姓名**,然后申请加入课程，未按要求填写学号和姓名的，将不会被批准。\n\r$ 在使用过程中，请不要更改学号和姓名，不然将影响计成绩。\n\r课程组老师和助教联系方式:\n\r    宋 友songyou@buaa. edu.cn lab.buaacoding.cn/ysong/\n\r    郭镕昊941777656@qq.com\n\r    李 想214481008@qq.com\n\r    李昕航848318504@qq.com\n\r如对课程相关内容有任何疑问或建议，请联系助教。', 1, NULL);
+INSERT INTO `courses` (`course_id`, `course_name`, `introduction`, `teacher_id`) VALUES
+			(1, '2018级-软件学院-算法设计与分析', '无', 1),
+			(2, '2019级-中法工程师学院-大学计算机基础', '《软件学院2017级算法分析与设计》，2018秋季学期\n\r上课时间地点: 1-17周四6-7节， J3-311\n\r上机时间地点: 3周周五晚，6-14周双周六3-4节，S7-601, 602, 603 (测试时间地点另行通知)\n\r讲评时间地点: 5-13周单周五11-12节，J3-410\n\r$ 请各位同学在个人信息中填好**真实学号**并将用户昵称改为**真实姓名**,然后申请加入课程，未按要求填写学号和姓名的，将不会被批准。\n\r$ 在使用过程中，请不要更改学号和姓名，不然将影响计成绩。\n\r课程组老师和助教联系方式:\n\r    宋 友songyou@buaa. edu.cn lab.buaacoding.cn/ysong/\n\r    郭镕昊941777656@qq.com\n\r    李 想214481008@qq.com\n\r    李昕航848318504@qq.com\n\r如对课程相关内容有任何疑问或建议，请联系助教。', 1);
 
 --
 -- 学生与课程关系数据表

@@ -10,7 +10,6 @@
         <result property="courseName" column="course_name"></result>
         <result property="introduction" column="introduction"></result>
         <result property="teacherId" column="teacher_id"></result>
-        <result property="coursewareUrl" column="courseware_url"></result>
     </resultMap>
 
     <select id="getAllCourses" resultMap="CourseResultMap" useCache="true">
@@ -28,16 +27,15 @@
 
     <insert id="insertCourse" parameterType="Course" useGeneratedKeys="true"
             keyProperty="courseId" keyColumn="course_id" flushCache="true">
-        INSERT INTO courses (course_name, introduction, teacher_id, courseware_url)
-        VALUES (#{courseName}, #{introduction}, #{teacherId}, #{coursewareUrl});
+        INSERT INTO courses (course_name, introduction, teacher_id)
+        VALUES (#{courseName}, #{introduction}, #{teacherId});
     </insert>
     
     <update id="updateCourse" parameterType="Course" flushCache="true">
         update courses
         <set>
-            <if test="courseName != null and courseName.length() > 0">course_name = #{courseName}</if>
-            <if test="coursewareUrl != null> 0">courseware_url = #{coursewareUrl}</if>
-            <if test="introduction != null">introduction = #{introduction}</if>
+            <if test="courseName != null and courseName.length() > 0">course_name = #{courseName},</if>
+            <if test="introduction != null">introduction = #{introduction},</if>
         </set>
         WHERE course_id = #{courseId};
     </update>

@@ -102,7 +102,7 @@ public class ProblemController {
         if( course == null ){
             return new HttpResponseWrapperUtil(null, -1, "课程不存在");
         }
-        List<Contest> contestList = contestService.getContestsOfCourse(courseId);
+        List<Contest> contestList = contestService.getVisibleContestsOfCourse(courseId);
         if( contestList == null || contestList.size() == 0 ){
             return new HttpResponseWrapperUtil(null);
         }

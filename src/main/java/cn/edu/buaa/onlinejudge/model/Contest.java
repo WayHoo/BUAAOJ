@@ -1,5 +1,7 @@
 package cn.edu.buaa.onlinejudge.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.sql.Timestamp;
 import java.util.Date;
 
@@ -20,23 +22,24 @@ public class Contest {
     private int courseId;
 
     /**
-     * 竞赛开始时间
+     * 竞赛开始时间，使用注解规定解析的前端数据格式
      */
-//    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd HH:mm:ss")
     private Timestamp startTime;
 
     /**
-     * 竞赛结束时间
+     * 竞赛结束时间，使用注解规定解析的前端数据格式
      */
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd HH:mm:ss")
     private Timestamp finishTime;
 
     /**
-     * 竞赛是否对学生可见
+     * 竞赛是否对学生可见，数据库默认可见
      */
     private boolean isVisible;
 
     /**
-     * 竞赛的可答题状态，针对已结束的竞赛。
+     * 竞赛的可答题状态，针对已结束的竞赛。数据库默认可答题
      * true - 可答题，false - 不可答题
      */
     private boolean isAnswerable;

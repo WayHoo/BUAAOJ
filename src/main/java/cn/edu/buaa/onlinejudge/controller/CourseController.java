@@ -4,6 +4,7 @@ import cn.edu.buaa.onlinejudge.model.Course;
 import cn.edu.buaa.onlinejudge.model.Student;
 import cn.edu.buaa.onlinejudge.service.*;
 import cn.edu.buaa.onlinejudge.utils.HttpResponseWrapperUtil;
+import cn.edu.buaa.onlinejudge.utils.MD5Util;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,11 +30,28 @@ public class CourseController {
         return wrapCourseList2JSON(allCourses);
     }
 
-    @ApiOperation("教师查看所有课程接口")
-    @GetMapping(value = "/getCoursesOfTeacher/{teacherId}")
-    public HttpResponseWrapperUtil getCoursesOfTeacher(@PathVariable("teacherId") long teacherId) {
+    @ApiOperation("教师查看课程列表接口")
+    @GetMapping(value = "/getCourseList/{teacherId}")
+    public HttpResponseWrapperUtil getCourseList(@PathVariable("teacherId") long teacherId) {
         List<Course> courses = courseService.getCoursesOfTeacher(teacherId);
         return wrapCourseList2JSON(courses);
+    }
+
+    @ApiOperation("教师查看课程信息接口")
+    @GetMapping(value = "/getCourseById/{teacherId}/{courseId}")
+    public HttpResponseWrapperUtil getCourseById(@PathVariable("teacherId") long teacherId,
+                                                 @PathVariable("courseId") int courseId) {
+        Course course = courseService.getCourseById(courseId);
+        if( course == null ){
+            return new HttpResponseWrapperUtil(null, -1, "课程不存在");
+        }
+        if( teacherId != course.getTeacherId() ){
+            return new HttpResponseWrapperUtil(null, -1, "教师权限不足");
+        }
+        Map<String,Object> data = new HashMap<>();
+        data.put("courseName",course.getCourseName());
+        data.put("introduction",course.getIntroduction());
+        return new HttpResponseWrapperUtil(data);
     }
 
     @ApiOperation("教师新建课程接口")
@@ -48,7 +66,90 @@ public class CourseController {
     @ApiOperation("教师修改课程信息")
     @PostMapping(value = "/updateCourse")
     public HttpResponseWrapperUtil updateCourseIntro(@RequestBody Course course) {
+        Course realCourse = courseService.getCourseById(course.getCourseId());
+        if( realCourse == null ){
+            return new HttpResponseWrapperUtil(null, -1, "课程不存在");
+        }
         courseService.updateCourse(course);
+        return new HttpResponseWrapperUtil(null);
+    }
+
+    @ApiOperation("教师审核课程成员接口")
+    @GetMapping(value = "/auditCourseMembers/{teacherId}/{courseId}/{tag}")
+    public HttpResponseWrapperUtil auditCourseMembers(@PathVariable("teacherId") long teacherId,
+                                                      @PathVariable("courseId") int courseId,
+                                                      @PathVariable("tag") int tag) {
+        Course course = courseService.getCourseById(courseId);
+        if( course == null ){
+            return new HttpResponseWrapperUtil(null, -1, "课程不存在");
+        }
+        if( teacherId != course.getTeacherId() ){
+            return new HttpResponseWrapperUtil(null, -1, "教师权限不足");
+        }
+        if( tag != 0 && tag != 1 ){
+            return new HttpResponseWrapperUtil(null, -1, "tag值错误");
+        }
+        List<Map<String,Object>> data = courseService.getCourseMembers(courseId,tag);
+        return new HttpResponseWrapperUtil(data);
+    }
+
+    @ApiOperation("教师修改课程成员角色接口")
+    @GetMapping(value = "/changeCourseMemberRole/{teacherId}/{courseId}/{studentId}/{role}")
+    public HttpResponseWrapperUtil changeCourseMemberRole(@PathVariable("teacherId") long teacherId,
+                                                      @PathVariable("courseId") int courseId,
+                                                      @PathVariable("studentId") long studentId,
+                                                      @PathVariable("role") int role) {
+        Course course = courseService.getCourseById(courseId);
+        if( course == null ){
+            return new HttpResponseWrapperUtil(null, -1, "课程不存在");
+        }
+        if( teacherId != course.getTeacherId() ){
+            return new HttpResponseWrapperUtil(null, -1, "教师权限不足");
+        }
+        if( courseService.isStudentJoinCourse(studentId,courseId) != 1 ){
+            return new HttpResponseWrapperUtil(null, -1, "学生尚未加入课程");
+        }
+        if( role != 0 && role != 1 ){
+            return new HttpResponseWrapperUtil(null, -1, "role值错误");
+        }
+        courseService.updateCourseMemberRole(courseId, studentId, role);
+        return new HttpResponseWrapperUtil(null);
+    }
+
+    @ApiOperation("教师加入或移除学生接口")
+    @GetMapping(value = "/auditStudent/{teacherId}/{courseId}/{studentId}/{status}")
+    public HttpResponseWrapperUtil auditStudent(@PathVariable("teacherId") long teacherId,
+                                                @PathVariable("courseId") int courseId,
+                                                @PathVariable("studentId") long studentId,
+                                                @PathVariable("status") int status) {
+        Course course = courseService.getCourseById(courseId);
+        if( course == null ){
+            return new HttpResponseWrapperUtil(null, -1, "课程不存在");
+        }
+        if( teacherId != course.getTeacherId() ){
+            return new HttpResponseWrapperUtil(null, -1, "教师权限不足");
+        }
+        if( status != 0 && status != 1 ){
+            return new HttpResponseWrapperUtil(null, -1, "status值错误");
+        }
+        courseService.auditStudent(courseId, studentId, status);
+        return new HttpResponseWrapperUtil(null);
+    }
+
+    @ApiOperation("课程管理员重置其课程中学生密码接口")
+    @GetMapping(value = "/resetStudentPasswordByTeacher/{courseId}/{studentId}")
+    public HttpResponseWrapperUtil resetStudentPasswordByTeacher(@PathVariable(value = "courseId") int courseId,
+                                                                 @PathVariable(value = "studentId") long studentId){
+        Course course = courseService.getCourseById(courseId);
+        if( course == null ){
+            return new HttpResponseWrapperUtil(null, -1, "课程不存在");
+        }
+        if( courseService.isStudentJoinCourse(studentId, courseId) != 1 ){
+            return new HttpResponseWrapperUtil(null, -1, "权限不足");
+        }
+        Student student = studentService.getStudentById(studentId);
+        student.setPassword(MD5Util.encryptedByMD5(student.getEmail()));
+        studentService.resetPassword(student);
         return new HttpResponseWrapperUtil(null);
     }
 
@@ -96,7 +197,11 @@ public class CourseController {
         if( (int)map.get("status") != 1 ){
             return new HttpResponseWrapperUtil(null, -1, "请先加入课程");
         }
-        List<Object> data = courseService.getCourseMembers(courseId);
+        List<Map<String,Object>> data = courseService.getCourseMembers(courseId,1);
+        //学生查看课程成员不需要返回学生ID
+        for (Map<String, Object> metadata : data) {
+            metadata.remove("studentId");
+        }
         return new HttpResponseWrapperUtil(data);
     }
 

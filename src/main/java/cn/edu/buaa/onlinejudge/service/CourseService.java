@@ -7,6 +7,7 @@ import cn.edu.buaa.onlinejudge.model.Course;
 import cn.edu.buaa.onlinejudge.model.CourseStudentRelationship;
 import cn.edu.buaa.onlinejudge.model.Student;
 import cn.edu.buaa.onlinejudge.utils.FileUtil;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -66,12 +67,22 @@ public class CourseService {
         courseStudentRelationshipMapper.insertCourseStudentRelationship(newRelationship);
     }
 
-    public List<Object> getCourseMembers(int courseId) {
-        List<Object> memberList = new ArrayList<>();
+    /**
+     * 获取课程审核通过或未通过的成员
+     * @param courseId - 课程ID
+     * @param tag - 选择标签，tag = 0表示获取审核未通过的成员，tag = 1表示获取审核通过的成员
+     * @return
+     */
+    public List<Map<String,Object>> getCourseMembers(int courseId, int tag) {
+        if( tag != 0 && tag != 1 ){
+            return null;
+        }
+        List<Map<String,Object>> memberList = new ArrayList<>();
         List<CourseStudentRelationship> relationshipList =
-                courseStudentRelationshipMapper.getCourseMembers(courseId);
+                courseStudentRelationshipMapper.getCourseMembers(courseId,tag);
         for (CourseStudentRelationship relationship : relationshipList) {
             Map<String,Object> metadata = new HashMap<>();
+            metadata.put("studentId",relationship.getStudentId());
             metadata.put("studentRole",relationship.getStudentRole());
             Student student = studentMapper.getStudentById(relationship.getStudentId());
             metadata.put("studentName",student.getUserName());
@@ -102,5 +113,13 @@ public class CourseService {
         String filePath = FileUtil.getUploadPath(Integer.toString(courseId));
         File file = new File(filePath + "courseware.zip");
         return file.exists();
+    }
+
+    public void updateCourseMemberRole(int courseId, long studentId, int role){
+        courseStudentRelationshipMapper.updateCourseMemberRole(courseId, studentId, role);
+    }
+
+    public void auditStudent(int courseId, long studentId, int isStudentAccept){
+        courseStudentRelationshipMapper.auditStudent(courseId, studentId, isStudentAccept);
     }
 }
