@@ -210,7 +210,7 @@ INSERT INTO `contests` (`contest_id`, `contest_name`, `course_id`, `start_time`,
 CREATE TABLE `problems` (
   `problem_id` BIGINT AUTO_INCREMENT PRIMARY KEY,
   `contest_id` INT NOT NULL,
-  `problem_number` TINYINT UNIQUE NOT NULL,
+  `problem_number` TINYINT NOT NULL,
   `judge_mechanism` TINYINT DEFAULT 0 NOT NULL,
   `author` VARCHAR(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `problem_name` VARCHAR(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,

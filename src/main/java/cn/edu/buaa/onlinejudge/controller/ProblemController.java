@@ -119,6 +119,58 @@ public class ProblemController {
         return new HttpResponseWrapperUtil(data);
     }
 
+    @ApiOperation("教师查看竞赛题目接口")
+    @GetMapping(value = "/getProblemsOfContest/{contestId}")
+    public HttpResponseWrapperUtil getProblemsOfContest(@PathVariable("contestId") int contestId) {
+        Contest contest = contestService.getContestById(contestId);
+        if( contest == null ){
+            return new HttpResponseWrapperUtil(null, -1, "竞赛不存在");
+        }
+        List<Problem> problemList = problemService.getProblemsOfContest(contestId);
+        List<Object> data = new ArrayList<>();
+        if( problemList != null ){
+            for (Problem problem : problemList) {
+                Map<String,Object> metadata = new HashMap<>();
+                metadata.put("problemId", problem.getProblemId());
+                metadata.put("problemNumber", problem.getProblemNumber());
+                metadata.put("problemName", problem.getProblemName());
+                metadata.put("author", problem.getAuthor());
+                data.add(metadata);
+            }
+        }
+        return new HttpResponseWrapperUtil(data);
+    }
+
+    @ApiOperation("教师新建题目接口")
+    @PostMapping(value = "/createProblem")
+    public HttpResponseWrapperUtil createProblem(@RequestBody Problem problem) {
+        Contest contest = contestService.getContestById(problem.getContestId());
+        if( contest == null ){
+            return new HttpResponseWrapperUtil(null, -1, "竞赛不存在");
+        }
+        problemService.insertProblem(problem);
+        Map<String,Object> data = new HashMap<>();
+        data.put("problemId", problem.getProblemId());
+        return new HttpResponseWrapperUtil(data);
+    }
+
+    @ApiOperation("教师删除题目接口")
+    @GetMapping(value = "/deleteProblem/{contestId}/{problemId}")
+    public HttpResponseWrapperUtil deleteProblem(@PathVariable("contestId") int contestId,
+                                                 @PathVariable("problemId") long problemId) {
+        Problem problem = problemService.getProblemById(problemId);
+        if( problem == null ){
+            return new HttpResponseWrapperUtil(null, -1, "该题目不存在");
+        }
+        if( problem.getContestId() != contestId ){
+            return new HttpResponseWrapperUtil(null, -1, "权限不足");
+        }
+        problemService.deleteProblem(problemId);
+        return new HttpResponseWrapperUtil(null);
+    }
+
+
+
     /**
      * 封装Problem对象为JSON数据格式
      * @param problem - Problem对象

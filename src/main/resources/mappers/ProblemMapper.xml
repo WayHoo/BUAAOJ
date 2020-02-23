@@ -51,4 +51,14 @@
     <select id="getProblemIdListOfContest" parameterType="int" resultType="long" useCache="true">
         SELECT problem_id FROM problems WHERE contest_id = #{contestId} ORDER BY problem_number ASC;
     </select>
+
+    <insert id="insertProblem" parameterType="Problem" flushCache="true"
+            useGeneratedKeys="true" keyColumn="problem_id" keyProperty="problemId">
+        INSERT INTO problems (contest_id, problem_number, judge_mechanism, author, problem_name, time_limit, memory_limit, description, input_format, output_format, input_sample, output_sample, sample_explanation, hint, code)
+        VALUES (#{contestId}, #{problemNumber}, #{judgeMechanism}, #{author}, #{problemName}, #{timeLimit}, #{memoryLimit}, #{description}, #{inputFormat}, #{outputFormat}, #{inputSample}, #{outputSample}, #{sampleExplanation}, #{hint}, #{code});
+    </insert>
+
+    <delete id="deleteProblem" parameterType="long" flushCache="true">
+        DELETE FROM problems WHERE problem_id = #{problemId};
+    </delete>
 </mapper>

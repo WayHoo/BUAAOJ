@@ -44,4 +44,12 @@ public class ProblemService {
     public List<Long> getProblemIdListOfContest(int contestId){
         return problemMapper.getProblemIdListOfContest(contestId);
     }
+
+    public void insertProblem(Problem problem){
+        problemMapper.insertProblem(problem);
+    }
+
+    public void deleteProblem(long problemId){
+        problemMapper.deleteProblem(problemId);
+    }
 }

@@ -34,4 +34,16 @@ public interface ProblemMapper {
      * @return 题目ID列表
      */
     List<Long> getProblemIdListOfContest(int contestId);
+
+    /**
+     * 插入题目
+     * @param problem - 题目对象
+     */
+    void insertProblem(Problem problem);
+
+    /**
+     * 删除题目
+     * @param problemId - 题目ID
+     */
+    void deleteProblem(long problemId);
 }
