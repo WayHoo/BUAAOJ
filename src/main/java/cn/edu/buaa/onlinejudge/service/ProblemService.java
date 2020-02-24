@@ -1,6 +1,8 @@
 package cn.edu.buaa.onlinejudge.service;
 
+import cn.edu.buaa.onlinejudge.mapper.InputOutputSampleMapper;
 import cn.edu.buaa.onlinejudge.mapper.ProblemMapper;
+import cn.edu.buaa.onlinejudge.model.InputOutputSample;
 import cn.edu.buaa.onlinejudge.model.Problem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,12 +16,30 @@ public class ProblemService {
     @Autowired
     private ProblemMapper problemMapper;
 
+    @Autowired
+    private InputOutputSampleMapper inputOutputSampleMapper;
+
+    /**
+     * 根据题目ID查询题目
+     * 由于题目的基本信息与输入输出样例存储在不同数据表中，因此需要查表两次
+     * @param problemId
+     * @return
+     */
     public Problem getProblemById(long problemId){
-        return problemMapper.getProblemById(problemId);
+        Problem problem = problemMapper.getProblemById(problemId);
+        List<InputOutputSample> sampleList = inputOutputSampleMapper.getInputOutputSamplesOfProblem(problemId);
+        problem.setInputOutputSamples(sampleList);
+        return problem;
     }
 
+    /**
+     * 获取多个竞赛下的所有题目，查询的题目中不包含输入输出样例
+     * @param contestIdList - 竞赛ID列表
+     * @return Problem对象列表
+     */
     public List<Problem> getProblemsByContestIdList(List<Integer> contestIdList) {
         return problemMapper.getProblemsByContestIdList(contestIdList);
+
     }
 
     public Map<String,Object> getPageProblemsByContestIdList(List<Integer> contestIdList,

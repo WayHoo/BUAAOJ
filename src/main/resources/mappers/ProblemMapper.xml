@@ -17,8 +17,6 @@
         <result property="description" column="description"></result>
         <result property="inputFormat" column="input_format"></result>
         <result property="outputFormat" column="output_format"></result>
-        <result property="inputSample" column="input_sample"></result>
-        <result property="outputSample" column="output_sample"></result>
         <result property="sampleExplanation" column="sample_explanation"></result>
         <result property="hint" column="hint"></result>
         <result property="code" column="code"></result>
@@ -54,8 +52,8 @@
 
     <insert id="insertProblem" parameterType="Problem" flushCache="true"
             useGeneratedKeys="true" keyColumn="problem_id" keyProperty="problemId">
-        INSERT INTO problems (contest_id, problem_number, judge_mechanism, author, problem_name, time_limit, memory_limit, description, input_format, output_format, input_sample, output_sample, sample_explanation, hint, code)
-        VALUES (#{contestId}, #{problemNumber}, #{judgeMechanism}, #{author}, #{problemName}, #{timeLimit}, #{memoryLimit}, #{description}, #{inputFormat}, #{outputFormat}, #{inputSample}, #{outputSample}, #{sampleExplanation}, #{hint}, #{code});
+        INSERT INTO problems (contest_id, problem_number, judge_mechanism, author, problem_name, time_limit, memory_limit, description, input_format, output_format, sample_explanation, hint, code)
+        VALUES (#{contestId}, #{problemNumber}, #{judgeMechanism}, #{author}, #{problemName}, #{timeLimit}, #{memoryLimit}, #{description}, #{inputFormat}, #{outputFormat}, #{sampleExplanation}, #{hint}, #{code});
     </insert>
 
     <delete id="deleteProblem" parameterType="long" flushCache="true">

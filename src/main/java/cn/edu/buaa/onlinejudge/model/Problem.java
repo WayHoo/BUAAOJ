@@ -1,5 +1,7 @@
 package cn.edu.buaa.onlinejudge.model;
 
+import java.util.List;
+
 public class Problem {
     /**
      * 题目ID
@@ -57,14 +59,9 @@ public class Problem {
     private String outputFormat;
 
     /**
-     * 题目输入样例，可能会有多组输入样例
+     * 题目输入输出样例数组
      */
-    private String inputSample;
-
-    /**
-     * 题目输出样例，可能会有多组输出样例
-     */
-    private String outputSample;
+    List<InputOutputSample> inputOutputSamples;
 
     /**
      * 样例解释
@@ -171,20 +168,12 @@ public class Problem {
         this.outputFormat = outputFormat;
     }
 
-    public String getInputSample() {
-        return inputSample;
+    public List<InputOutputSample> getInputOutputSamples() {
+        return inputOutputSamples;
     }
 
-    public void setInputSample(String inputSample) {
-        this.inputSample = inputSample;
-    }
-
-    public String getOutputSample() {
-        return outputSample;
-    }
-
-    public void setOutputSample(String outputSample) {
-        this.outputSample = outputSample;
+    public void setInputOutputSamples(List<InputOutputSample> inputOutputSamples) {
+        this.inputOutputSamples = inputOutputSamples;
     }
 
     public String getSampleExplanation() {

@@ -1,9 +1,6 @@
 package cn.edu.buaa.onlinejudge.controller;
 
-import cn.edu.buaa.onlinejudge.model.Contest;
-import cn.edu.buaa.onlinejudge.model.Course;
-import cn.edu.buaa.onlinejudge.model.Problem;
-import cn.edu.buaa.onlinejudge.model.Submission;
+import cn.edu.buaa.onlinejudge.model.*;
 import cn.edu.buaa.onlinejudge.service.ContestService;
 import cn.edu.buaa.onlinejudge.service.CourseService;
 import cn.edu.buaa.onlinejudge.service.ProblemService;
@@ -54,8 +51,7 @@ public class ProblemController {
         data.put("description",problem.getDescription());
         data.put("inputFormat",problem.getInputFormat());
         data.put("outputFormat",problem.getOutputFormat());
-        data.put("inputSample",problem.getInputSample());
-        data.put("outputSample",problem.getOutputSample());
+        data.put("inputOutputSamples", problem.getInputOutputSamples());
         data.put("sampleExplanation",problem.getSampleExplanation());
         data.put("hint",problem.getHint());
         data.put("code",problem.getCode());

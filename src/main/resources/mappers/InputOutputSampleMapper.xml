@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace存放映射文件的路径，指动态代理方式的接口全类名-->
+<mapper namespace="cn.edu.buaa.onlinejudge.mapper.InputOutputSampleMapper">
+
+    <resultMap id="InputOutputSampleResultMap" type="InputOutputSample">
+        <id property="problemId" column="problem_id"></id>
+        <id property="sampleNumber" column="sample_number"></id>
+        <result property="sampleInput" column="sample_input"></result>
+        <result property="sampleOutput" column="sample_output"></result>
+    </resultMap>
+
+    <select id="getInputOutputSamplesOfProblem" parameterType="long"
+            resultMap="InputOutputSampleResultMap" useCache="true">
+        SELECT * FROM input_output_samples WHERE problem_id = #{problemId};
+    </select>
+</mapper>
