@@ -7,7 +7,6 @@ import cn.edu.buaa.onlinejudge.model.Course;
 import cn.edu.buaa.onlinejudge.model.CourseStudentRelationship;
 import cn.edu.buaa.onlinejudge.model.Student;
 import cn.edu.buaa.onlinejudge.utils.FileUtil;
-import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -121,5 +120,9 @@ public class CourseService {
 
     public void auditStudent(int courseId, long studentId, int isStudentAccept){
         courseStudentRelationshipMapper.auditStudent(courseId, studentId, isStudentAccept);
+    }
+
+    public void deleteCourse(int courseId){
+        courseMapper.deleteCourse(courseId);
     }
 }

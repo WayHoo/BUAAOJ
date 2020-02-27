@@ -19,27 +19,33 @@ public interface ProblemMapper {
      * @param contestIdlist - 竞赛ID列表
      * @return Problem列表
      */
-    List<Problem> getProblemsByContestIdList(List<Integer> contestIdlist);
+    List<Problem> getVisibleProblemsByContestIdList(List<Integer> contestIdlist);
+
+    /**
+     * 获取指定竞赛下的所有可见题目
+     * @param contestId - 竞赛ID
+     * @return Problem对象列表
+     */
+    List<Problem> getVisibleProblemsOfContest(int contestId);
 
     /**
      * 获取指定竞赛下的所有题目
      * @param contestId - 竞赛ID
-     * @return Problem列表
+     * @return - Problem对象列表
      */
-    List<Problem> getProblemsOfContest(int contestId);
-
-    /**
-     * 获取指定竞赛下的所有题目ID
-     * @param contestId - 竞赛ID
-     * @return 题目ID列表
-     */
-    List<Long> getProblemIdListOfContest(int contestId);
+    List<Problem> getAllProblemsOfContest(int contestId);
 
     /**
      * 插入题目
      * @param problem - 题目对象
      */
     void insertProblem(Problem problem);
+
+    /**
+     * 修改题目信息
+     * @param problem - 题目对象
+     */
+    void updateProblem(Problem problem);
 
     /**
      * 删除题目

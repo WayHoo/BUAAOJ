@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace存放映射文件的路径，指动态代理方式的接口全类名-->
+<mapper namespace="cn.edu.buaa.onlinejudge.mapper.ProblemRankInfoMapper">
+
+    <resultMap id="ProblemRankInfoResultMap" type="ProblemRankInfo">
+        <id property="studentId" column="student_id"></id>
+        <id property="problemId" column="problem_id"></id>
+        <result property="contestId" column="contest_id"></result>
+        <result property="score" column="score"></result>
+        <result property="judgeResult" column="judge_result"></result>
+        <result property="wrongSubmitTimes" column="wrong_submit_times"></result>
+        <result property="submitTime" column="submit_time"></result>
+    </resultMap>
+
+    <select id="getProblemSubmitStudents" parameterType="long" resultType="long" useCache="true">
+        SELECT COUNT(*) FROM problem_rank_info WHERE problem_id = #{problemId};
+    </select>
+
+    <select id="getProblemAcceptStudents" parameterType="long" resultType="long" useCache="true">
+        SELECT COUNT(*) FROM problem_rank_info WHERE problem_id = #{problemId} AND judge_result = 'AC';
+    </select>
+
+    <select id="getProblemRankInfoByStudentIdAndProblemId" parameterType="Map" resultMap="ProblemRankInfoResultMap" useCache="true">
+        SELECT * FROM problem_rank_info WHERE student_id = #{studentId} AND problem_id = #{problemId};
+    </select>
+    
+    <insert id="insertProblemRankInfo" parameterType="ProblemRankInfo" flushCache="true">
+        INSERT INTO problem_rank_info (student_id, contest_id, problem_id, score, judge_result, wrong_submit_times, submit_time)
+        VALUES (#{studentId}, #{contestId}, #{problemId}, #{score}, #{judgeResult}, #{wrongSubmitTimes}, #{submitTime});
+    </insert>
+
+    <update id="updateProblemRankInfo" parameterType="ProblemRankInfo" flushCache="true">
+        UPDATE problem_rank_info SET score = #{score}, judge_result = #{judgeResult},
+        wrong_submit_times = #{wrongSubmitTimes}, submit_time = #{submitTime} WHERE
+        student_id = #{studentId} AND problem_id = #{problemId};
+    </update>
+</mapper>

@@ -27,25 +27,28 @@ public class ProblemService {
      */
     public Problem getProblemById(long problemId){
         Problem problem = problemMapper.getProblemById(problemId);
+        if( problem == null ){
+            return null;
+        }
         List<InputOutputSample> sampleList = inputOutputSampleMapper.getInputOutputSamplesOfProblem(problemId);
         problem.setInputOutputSamples(sampleList);
         return problem;
     }
 
     /**
-     * 获取多个竞赛下的所有题目，查询的题目中不包含输入输出样例
+     * 获取多个竞赛下的所有可见题目，查询的题目中不包含输入输出样例
      * @param contestIdList - 竞赛ID列表
      * @return Problem对象列表
      */
-    public List<Problem> getProblemsByContestIdList(List<Integer> contestIdList) {
-        return problemMapper.getProblemsByContestIdList(contestIdList);
+    public List<Problem> getVisibleProblemsByContestIdList(List<Integer> contestIdList) {
+        return problemMapper.getVisibleProblemsByContestIdList(contestIdList);
 
     }
 
-    public Map<String,Object> getPageProblemsByContestIdList(List<Integer> contestIdList,
-                                                        int pageSize, int pageIndex) {
+    public Map<String,Object> getPageVisibleProblemsByContestIdList(List<Integer> contestIdList,
+                                                                    int pageSize, int pageIndex) {
         Map<String,Object> map = new HashMap<>();
-        List<Problem> problemList = getProblemsByContestIdList(contestIdList);
+        List<Problem> problemList = getVisibleProblemsByContestIdList(contestIdList);
         map.put("totalProblemNum",problemList.size());
         if( pageSize * pageIndex >= problemList.size() ){
             map.put("problemList",null);
@@ -57,18 +60,45 @@ public class ProblemService {
         return map;
     }
 
-    public List<Problem> getProblemsOfContest(int contestId){
-        return problemMapper.getProblemsOfContest(contestId);
+    public List<Problem> getVisibleProblemsOfContest(int contestId){
+        return problemMapper.getVisibleProblemsOfContest(contestId);
     }
 
-    public List<Long> getProblemIdListOfContest(int contestId){
-        return problemMapper.getProblemIdListOfContest(contestId);
+    public List<Problem> getAllProblemsOfContest(int contestId){
+        return problemMapper.getAllProblemsOfContest(contestId);
     }
 
     public void insertProblem(Problem problem){
         problemMapper.insertProblem(problem);
+        insertInputOutputSamplesOfProblem(problem);
     }
 
+    public void updateProblem(Problem problem){
+        problemMapper.updateProblem(problem);
+        //更新题目输入输出样例通过“先删除再插入”实现
+        inputOutputSampleMapper.deleteInputOutputSamplesOfProblem(problem.getProblemId());
+        insertInputOutputSamplesOfProblem(problem);
+    }
+
+    public void insertInputOutputSamplesOfProblem(Problem problem){
+        List<InputOutputSample> inputOutputSamples = problem.getInputOutputSamples();
+        if( inputOutputSamples != null ){
+            int i = 1;
+            for (InputOutputSample inputOutputSample : inputOutputSamples) {
+                inputOutputSample.setProblemId(problem.getProblemId());
+                inputOutputSample.setSampleNumber(i++);
+                inputOutputSampleMapper.insertInputOutputSample(inputOutputSample);
+            }
+        }
+    }
+
+    /**
+     * 删除题目
+     * 题目输入输出样例与题目存储在不同数据表中，但由于两表使用外键连接，
+     * 并设置了`ON DELETE CASCADE ON UPDATE CASCADE`，因此删除题目数据表中的题目后，
+     * 输入输出数据表中的相关数据自动删除
+     * @param problemId
+     */
     public void deleteProblem(long problemId){
         problemMapper.deleteProblem(problemId);
     }

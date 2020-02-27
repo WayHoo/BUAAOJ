@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace存放映射文件的路径，指动态代理方式的接口全类名-->
+<mapper namespace="cn.edu.buaa.onlinejudge.mapper.ContestMapper">
+
+    <resultMap id="ContestRankResultMap" type="ContestRank">
+        <result property="contestId" column="contest_id"></result>
+        <result property="studentId" column="student_id"></result>
+        <result property="studentName" column="student_name"></result>
+        <result property="score" column="score"></result>
+        <result property="wrongSubmitTimes" column="wrong_submit_times"></result>
+    </resultMap>
+
+    <select id="getContestPageRanks" parameterType="Map"
+            resultMap="ContestRankResultMap" useCache="true">
+        SELECT * FROM view_contest_ranks WHERE contest_id = #{contestId}
+        ORDER BY score DESC, wrong_submit_times ASC LIMIT #{pageSize} OFFSET ${pageIndex * pageSize};
+    </select>
+</mapper>

@@ -39,4 +39,8 @@
         </set>
         WHERE course_id = #{courseId};
     </update>
+
+    <delete id="deleteCourse" parameterType="int" flushCache="true">
+        DELETE FROM courses WHERE course_id = #{courseId};
+    </delete>
 </mapper>

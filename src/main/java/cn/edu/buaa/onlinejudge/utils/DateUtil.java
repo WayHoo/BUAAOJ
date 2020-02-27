@@ -40,6 +40,6 @@ public class DateUtil {
      * @return
      */
     public static String formatTimestamp(Timestamp timestamp){
-        return timestamp.toString().substring(0,timestamp.toString().indexOf("."));
+        return timestamp == null ? null : timestamp.toString().substring(0,timestamp.toString().indexOf("."));
     }
 }

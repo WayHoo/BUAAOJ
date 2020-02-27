@@ -19,6 +19,11 @@ public class Submission {
     private long problemId;
 
     /**
+     * 题目所属竞赛ID
+     */
+    private int contestId;
+
+    /**
      * 提交的代码所使用的编程语言ID
      * 默认为Python 3，即ID = 1
      */
@@ -88,6 +93,14 @@ public class Submission {
 
     public void setProblemId(long problemId) {
         this.problemId = problemId;
+    }
+
+    public int getContestId() {
+        return contestId;
+    }
+
+    public void setContestId(int contestId) {
+        this.contestId = contestId;
     }
 
     public int getLanguageId() {

@@ -2,11 +2,10 @@ package cn.edu.buaa.onlinejudge.service;
 
 import cn.edu.buaa.onlinejudge.mapper.ContestMapper;
 import cn.edu.buaa.onlinejudge.model.Contest;
-import cn.edu.buaa.onlinejudge.utils.DateUtil;
+import cn.edu.buaa.onlinejudge.model.ContestRank;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.sql.Timestamp;
 import java.util.List;
 
 @Service
@@ -30,12 +29,12 @@ public class ContestService {
        return contestMapper.getTotalContestsNum();
    }
 
-   public List<Contest> getPageContests(int pageSize,int pageIndex) {
-       return contestMapper.getPageContests(pageSize,pageIndex);
+   public List<Contest> getPageVisibleContests(int pageSize, int pageIndex) {
+       return contestMapper.getPageVisibleContests(pageSize,pageIndex);
    }
 
-   public List<Integer> getContestIdListByCourseIdList(List<Integer> courseIdList) {
-       return contestMapper.getContestIdListByCourseIdList(courseIdList);
+   public List<Integer> getVisibleContestIdListByCourseIdList(List<Integer> courseIdList) {
+       return contestMapper.getVisibleContestIdListByCourseIdList(courseIdList);
    }
 
    public void insertContest(Contest contest){
@@ -54,5 +53,13 @@ public class ContestService {
 
    public void updateContest(Contest contest){
        contestMapper.updateContest(contest);
+   }
+
+   public List<ContestRank> getContestPageRanks(int pageSize, int pageIndex, int contestId){
+       return contestMapper.getContestPageRanks(pageSize, pageIndex, contestId);
+   }
+
+   public void deleteContest(int contestId){
+       contestMapper.deleteContest(contestId);
    }
 }

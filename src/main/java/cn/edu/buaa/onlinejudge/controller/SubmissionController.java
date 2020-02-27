@@ -1,9 +1,6 @@
 package cn.edu.buaa.onlinejudge.controller;
 
-import cn.edu.buaa.onlinejudge.model.Contest;
-import cn.edu.buaa.onlinejudge.model.Language;
-import cn.edu.buaa.onlinejudge.model.Problem;
-import cn.edu.buaa.onlinejudge.model.Submission;
+import cn.edu.buaa.onlinejudge.model.*;
 import cn.edu.buaa.onlinejudge.service.ContestService;
 import cn.edu.buaa.onlinejudge.service.LanguageService;
 import cn.edu.buaa.onlinejudge.service.ProblemService;
@@ -38,27 +35,30 @@ public class SubmissionController {
     @Autowired
     private LanguageService languageService;
 
-    @ApiOperation("查看学生对指定题目的提交记录接口")
+    @ApiOperation("学生查看对指定题目的提交记录接口")
     @GetMapping(value = "/getProblemSubmissionsOfStudent/{studentId}/{problemId}")
     public HttpResponseWrapperUtil getProblemSubmissionsOfStudent(@PathVariable("studentId") long studentId,
-                                                         @PathVariable("problemId") long problemId) {
+                                                                  @PathVariable("problemId") long problemId) {
         List<Submission> submissionList = submissionService.getSubmissionsByStudentIdAndProblemId(studentId,problemId);
-        List<Object> data = new ArrayList<>();
+        Map<String,Object> data = new HashMap<>();
+        data.put("acceptStudents", submissionService.getProblemAcceptStudents(problemId));
+        data.put("submitStudents", submissionService.getProblemSubmitStudents(problemId));
+        List<Object> submitRecords = new ArrayList<>();
         if( submissionList != null ) {
             for (Submission submission : submissionList) {
                 Map<String,Object> metadata = wrapSubmission2Json(submission);
-                data.add(metadata);
+                submitRecords.add(metadata);
             }
         }
+        data.put("submitRecords", submitRecords);
         return new HttpResponseWrapperUtil(data);
     }
 
-    @ApiOperation("查看学生对指定竞赛的提交记录接口")
+    @ApiOperation("学生查看对指定竞赛的提交记录接口")
     @GetMapping(value = "/getContestSubmissionsOfStudent/{studentId}/{contestId}")
     public HttpResponseWrapperUtil getContestSubmissionsOfStudent(@PathVariable("studentId") long studentId,
                                                                   @PathVariable("contestId") int contestId) {
-        List<Long> problemIdList = problemService.getProblemIdListOfContest(contestId);
-        List<Submission> submissionList = submissionService.getSubmissionsByStudentIdAndProblemIdList(studentId,problemIdList);
+        List<Submission> submissionList = submissionService.getSubmissionsOfContest(studentId, contestId);
         List<Object> data = new ArrayList<>();
         if( submissionList != null ) {
             for (Submission submission : submissionList) {
@@ -90,6 +90,29 @@ public class SubmissionController {
         submission.setSubmitTime(DateUtil.getCurrentTimestamp());
         submissionService.insertSubmission(submission);
         if( submission.getSubmissionId() > 0 ){
+            //提交ID进入队列
+            //判题
+            //插入problem_rank_info数据表
+            ProblemRankInfo problemRankInfo = submissionService.getProblemRankInfo(submission.getStudentId(), submission.getProblemId());
+            if( problemRankInfo == null ){
+                int wrongSubmitTimes = 0;
+                if( !"AC".equals(submission.getJudgeResult()) ){
+                    wrongSubmitTimes = 1;
+                }
+                problemRankInfo = new ProblemRankInfo(submission.getStudentId(),
+                        submission.getContestId(),submission.getProblemId(),
+                        submission.getJudgeScore(),submission.getJudgeResult(),
+                        wrongSubmitTimes, submission.getSubmitTime());
+                submissionService.insertProblemRankInfo(problemRankInfo);
+            }else{
+                problemRankInfo.setJudgeResult(submission.getJudgeResult());
+                problemRankInfo.setScore(submission.getJudgeScore());
+                problemRankInfo.setSubmitTime(submission.getSubmitTime());
+                if( !"AC".equals(submission.getJudgeResult()) ){
+                    problemRankInfo.setWrongSubmitTimes(problemRankInfo.getWrongSubmitTimes() + 1);
+                }
+                submissionService.updateProblemRankInfo(problemRankInfo);
+            }
             Map<String,Object> data = wrapSubmission2Json(submission);
             return new HttpResponseWrapperUtil(data);
         }else{

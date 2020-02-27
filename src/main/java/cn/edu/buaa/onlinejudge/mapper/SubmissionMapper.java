@@ -46,14 +46,23 @@ public interface SubmissionMapper {
     List<Submission> getSubmissionsByStudentIdAndProblemId(@Param("studentId") long studentId,
                                                            @Param("problemId") long problemId);
 
+//    /**
+//     * 查看指定学生对多个题目的所有提交记录，结果按照提交记录的时间先后顺序排序
+//     * @param studentId - 学生ID
+//     * @param problemIdList - 题目ID列表
+//     * @return Submission对象列表
+//     */
+//    List<Submission> getSubmissionsByStudentIdAndProblemIdList(@Param("studentId") long studentId,
+//                                                               @Param("problemIdList") List<Long> problemIdList);
+
     /**
-     * 查看指定学生对多个题目的所有提交记录，结果按照提交记录的时间先后顺序排序
+     * 查看学生对竞赛的所有提交记录，结果按照提交时间先后顺序排序
      * @param studentId - 学生ID
-     * @param problemIdList - 题目ID列表
+     * @param contestId - 竞赛ID
      * @return Submission对象列表
      */
-    List<Submission> getSubmissionsByStudentIdAndProblemIdList(@Param("studentId") long studentId,
-                                                               @Param("problemIdList") List<Long> problemIdList);
+    List<Submission> getSubmissionsByStudentIdAndContestId(@Param("studentId") long studentId,
+                                                           @Param("contestId") int contestId);
 
     /**
      * 插入提交记录

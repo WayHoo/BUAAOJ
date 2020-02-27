@@ -1,6 +1,9 @@
 package cn.edu.buaa.onlinejudge.service;
 
+import cn.edu.buaa.onlinejudge.mapper.ProblemMapper;
+import cn.edu.buaa.onlinejudge.mapper.ProblemRankInfoMapper;
 import cn.edu.buaa.onlinejudge.mapper.SubmissionMapper;
+import cn.edu.buaa.onlinejudge.model.ProblemRankInfo;
 import cn.edu.buaa.onlinejudge.model.Submission;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,8 +16,14 @@ public class SubmissionService {
     @Autowired
     private SubmissionMapper submissionMapper;
 
+    @Autowired
+    private ProblemMapper problemMapper;
+
+    @Autowired
+    private ProblemRankInfoMapper problemRankInfoMapper;
+
     public long getProblemSubmitStudents(long problemId) {
-        return submissionMapper.getProblemSubmitStudents(problemId);
+        return problemRankInfoMapper.getProblemSubmitStudents(problemId);
     }
 
     public long getProblemSubmitTimes(long problemId) {
@@ -22,7 +31,7 @@ public class SubmissionService {
     }
 
     public long getProblemAcceptStudents(long problemId) {
-        return submissionMapper.getProblemAcceptStudents(problemId);
+        return problemRankInfoMapper.getProblemAcceptStudents(problemId);
     }
 
     public Submission getStudentLatestSubmissionOfProblem(long studentId,long problemId) {
@@ -33,8 +42,14 @@ public class SubmissionService {
         return submissionMapper.getSubmissionsByStudentIdAndProblemId(studentId,problemId);
     }
 
-    public List<Submission> getSubmissionsByStudentIdAndProblemIdList(long studentId, List<Long> problemIdList) {
-        return submissionMapper.getSubmissionsByStudentIdAndProblemIdList(studentId,problemIdList);
+    /**
+     * 获取学生对指定竞赛的所有提交记录
+     * @param studentId - 学生ID
+     * @param contestId - 竞赛ID
+     * @return 竞赛对象列表
+     */
+    public List<Submission> getSubmissionsOfContest(long studentId, int contestId) {
+        return submissionMapper.getSubmissionsByStudentIdAndContestId(studentId, contestId);
     }
 
     public void insertSubmission(Submission submission){
@@ -51,17 +66,29 @@ public class SubmissionService {
     public int getSubmissionStatus(long studentId,long problemId){
         Submission submission = submissionMapper.getStudentLatestSubmissionOfProblem(studentId,problemId);
         int status = 0;
-        if( submission == null ){
-            status = 0;
-        } else if( "PD".equals(submission.getJudgeResult()) ){
-            status = 1;
-        } if( "AC".equals(submission.getJudgeResult()) ){
-            status = 3;
-        } else if( submission.getJudgeScore() > 0 ){
-            status = 2;
-        } else{
-            status = -1;
+        if( submission != null ){
+            if( "PD".equals(submission.getJudgeResult()) ){
+                status = 1;
+            } else if( "AC".equals(submission.getJudgeResult()) ){
+                status = 3;
+            } else if( submission.getJudgeScore() > 0 ){
+                status = 2;
+            } else{
+                status = -1;
+            }
         }
         return status;
+    }
+
+    public ProblemRankInfo getProblemRankInfo(long studentId, long problemId){
+        return problemRankInfoMapper.getProblemRankInfoByStudentIdAndProblemId(studentId, problemId);
+    }
+
+    public void insertProblemRankInfo(ProblemRankInfo problemRankInfo){
+        problemRankInfoMapper.insertProblemRankInfo(problemRankInfo);
+    }
+
+    public void updateProblemRankInfo(ProblemRankInfo problemRankInfo){
+        problemRankInfoMapper.updateProblemRankInfo(problemRankInfo);
     }
 }

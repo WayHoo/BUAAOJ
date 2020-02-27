@@ -38,4 +38,12 @@ public interface CourseMapper {
      * @param course - 课程对象
      */
     void updateCourse(Course course);
+
+    /**
+     * 删除课程
+     * 由于课程数据表、竞赛数据表、题目数据表之间的外键约束关系设置了`ON DELETE CASCADE ON UPDATE CASCADE`，
+     * 因此删除课程会自动删除课程中所有的竞赛，以及竞赛中所有的题目
+     * @param courseId
+     */
+    void deleteCourse(int courseId);
 }

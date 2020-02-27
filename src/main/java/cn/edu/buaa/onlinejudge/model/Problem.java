@@ -19,6 +19,11 @@ public class Problem {
     private int problemNumber;
 
     /**
+     * 题目是否对学生可见，数据库默认可见
+     */
+    private boolean isVisible;
+
+    /**
      * 题目的评测机制，0 - 在线评测，1 - 人工评测
      */
     private int judgeMechanism;
@@ -102,6 +107,14 @@ public class Problem {
 
     public void setProblemNumber(int problemNumber) {
         this.problemNumber = problemNumber;
+    }
+
+    public boolean isVisible() {
+        return isVisible;
+    }
+
+    public void setVisible(boolean visible) {
+        isVisible = visible;
     }
 
     public int getJudgeMechanism() {

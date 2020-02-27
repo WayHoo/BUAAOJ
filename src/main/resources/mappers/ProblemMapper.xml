@@ -9,6 +9,7 @@
         <id property="problemId" column="problem_id"></id>
         <result property="contestId" column="contest_id"></result>
         <result property="problemNumber" column="problem_number"></result>
+        <result property="isVisible" column="visibility" javaType="boolean" jdbcType="TINYINT"></result>
         <result property="judgeMechanism" column="judge_mechanism"></result>
         <result property="author" column="author"></result>
         <result property="problemName" column="problem_name"></result>
@@ -26,7 +27,7 @@
         SELECT * FROM problems WHERE problem_id = #{problemId};
     </select>
 
-    <select id="getProblemsByContestIdList" parameterType="List"
+    <select id="getVisibleProblemsByContestIdList" parameterType="List"
             resultMap="ProblemResultMap" useCache="true">
         SELECT * FROM problems WHERE contest_id IN
         <choose>
@@ -39,15 +40,16 @@
                 (NULL)
             </otherwise>
         </choose>
-        ORDER BY problem_id ASC;
+        AND visibility = 1 ORDER BY problem_id ASC;
     </select>
     
-    <select id="getProblemsOfContest" parameterType="int" resultMap="ProblemResultMap" useCache="true">
-        SELECT * FROM problems WHERE contest_id = #{contestId} ORDER BY problem_number ASC;
+    <select id="getVisibleProblemsOfContest" parameterType="int" resultMap="ProblemResultMap" useCache="true">
+        SELECT * FROM problems WHERE contest_id = #{contestId} AND visibility = 1
+        ORDER BY problem_number ASC;
     </select>
 
-    <select id="getProblemIdListOfContest" parameterType="int" resultType="long" useCache="true">
-        SELECT problem_id FROM problems WHERE contest_id = #{contestId} ORDER BY problem_number ASC;
+    <select id="getAllProblemsOfContest" parameterType="int" resultMap="ProblemResultMap" useCache="true">
+        SELECT * FROM problems WHERE contest_id = #{contestId} ORDER BY problem_number ASC;
     </select>
 
     <insert id="insertProblem" parameterType="Problem" flushCache="true"
@@ -59,4 +61,23 @@
     <delete id="deleteProblem" parameterType="long" flushCache="true">
         DELETE FROM problems WHERE problem_id = #{problemId};
     </delete>
+
+    <update id="updateProblem" parameterType="Problem" flushCache="true">
+        UPDATE problems
+        <set>
+            problem_number = #{problemNumber},
+            <if test="problemName != null and problemName.length() > 0">problem_name = #{problemName},</if>
+            <if test="author != null and author.length() > 0">author = #{author},</if>
+            <if test="timeLimit > 0">time_limit = #{timeLimit},</if>
+            <if test="memoryLimit > 0">memory_limit = #{memoryLimit},</if>
+            <if test="description != null and description.length() > 0">description = #{description},</if>
+            <if test="inputFormat != null and inputFormat.length() > 0">input_format = #{inputFormat},</if>
+            <if test="outputFormat != null and outputFormat.length() > 0">output_format = #{outputFormat},</if>
+            <if test="sampleExplanation != null">sample_explanation = #{sampleExplanation},</if>
+            <if test="judgeMechanism == 0 or judgeMechanism == 1">judge_mechanism = #{judgeMechanism},</if>
+            hint = #{hint},
+            code = #{code},
+        </set>
+        WHERE problem_id = #{problemId};
+    </update>
 </mapper>

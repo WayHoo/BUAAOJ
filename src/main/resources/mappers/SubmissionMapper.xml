@@ -9,6 +9,7 @@
         <id property="submissionId" column="submission_id"></id>
         <result property="studentId" column="student_id"></result>
         <result property="problemId" column="problem_id"></result>
+        <result property="contestId" column="contest_id"></result>
         <result property="languageId" column="language_id"></result>
         <result property="submitTime" column="submit_time"></result>
         <result property="executeTime" column="execute_time"></result>
@@ -20,21 +21,22 @@
         <result property="compileOutput" column="compile_output"></result>
     </resultMap>
 
-    <select id="getProblemSubmitStudents" parameterType="long" resultType="long" useCache="true">
-        SELECT COUNT(DISTINCT student_id) FROM submissions WHERE problem_id = #{problemId};
-    </select>
+<!--    <select id="getProblemSubmitStudents" parameterType="long" resultType="long" useCache="true">-->
+<!--        SELECT COUNT(DISTINCT student_id) FROM submissions WHERE problem_id = #{problemId};-->
+<!--    </select>-->
 
     <select id="getProblemSubmitTimes" parameterType="long" resultType="long" useCache="true">
-        SELECT COUNT(*) FROM submissions WHERE problem_id = #{problemId};
+        SELECT COUNT(*) FROM submissions AS s LEFT JOIN contests AS c ON s.contest_id = c.contest_id
+        WHERE problem_id = #{problemId} AND s.submit_time BETWEEN c.start_time AND c.finish_time;
     </select>
     
-    <select id="getProblemAcceptStudents" parameterType="long" resultType="long" useCache="true">
-        SELECT COUNT(*) FROM
-            (SELECT judge_result FROM submissions WHERE submission_id IN
-                (SELECT MAX(submission_id) FROM submissions
-                    WHERE problem_id = #{problemId} GROUP BY student_id)) a
-            WHERE a.judge_result = 'AC';
-    </select>
+<!--    <select id="getProblemAcceptStudents" parameterType="long" resultType="long" useCache="true">-->
+<!--        SELECT COUNT(*) FROM-->
+<!--            (SELECT judge_result FROM submissions WHERE submission_id IN-->
+<!--                (SELECT MAX(submission_id) FROM submissions-->
+<!--                    WHERE problem_id = #{problemId} GROUP BY student_id)) a-->
+<!--            WHERE a.judge_result = 'AC';-->
+<!--    </select>-->
 
     <select id="getStudentLatestSubmissionOfProblem" parameterType="Map"
             resultMap="SubmissionResultMap" useCache="true">
@@ -49,25 +51,15 @@
         ORDER BY submission_id ASC;
     </select>
 
-    <select id="getSubmissionsByStudentIdAndProblemIdList" parameterType="Map"
+    <select id="getSubmissionsByStudentIdAndContestId" parameterType="Map"
             resultMap="SubmissionResultMap" useCache="true">
-        SELECT * FROM submissions WHERE student_id = #{studentId} AND problem_id IN
-        <choose>
-            <when test="problemIdList != null and problemIdList.size() > 0">
-                <foreach collection="problemIdList" item="problemId" separator="," open="(" close=")">
-                    #{problemId}
-                </foreach>
-            </when>
-            <otherwise>
-                (NULL)
-            </otherwise>
-        </choose>
+        SELECT * FROM submissions WHERE student_id = #{studentId} AND contest_id = #{contestId}
         ORDER BY submission_id ASC;
     </select>
 
     <insert id="insertSubmission" parameterType="Submission" flushCache="true"
             useGeneratedKeys="true" keyProperty="submissionId" keyColumn="submission_id">
-        INSERT INTO submissions (student_id, problem_id, language_id, submit_time, execute_time, used_time, used_memory, judge_score, judge_result, submit_code, compile_output)
-        VALUES (#{studentId}, #{problemId}, #{languageId}, #{submitTime}, #{executeTime}, #{usedTime}, #{usedMemory}, #{judgeScore}, #{judgeResult}, #{submitCode}, #{compileOutput});
+        INSERT INTO submissions (student_id, problem_id, contest_id, language_id, submit_time, execute_time, used_time, used_memory, judge_score, judge_result, submit_code, compile_output)
+        VALUES (#{studentId}, #{problemId}, #{contestId}, #{languageId}, #{submitTime}, #{executeTime}, #{usedTime}, #{usedMemory}, #{judgeScore}, #{judgeResult}, #{submitCode}, #{compileOutput});
     </insert>
 </mapper>

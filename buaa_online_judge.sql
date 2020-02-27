@@ -174,7 +174,8 @@ INSERT INTO `course_student_relationships` (`relationship_id`, `course_id`, `stu
 
 -- 字段内容：竞赛ID（主键）、竞赛名称（字符串）、所属课程ID（连接课程数据表的外键）、
 -- 			开始时间（Date）、结束时间（Date）、可见性（可见(1)，不可见(0)）、
--- 			竞赛状态（可答题(1)，不可答题(0)）、竞赛简介（文本）
+-- 			竞赛状态（针对已结束的竞赛，可答题(1)，不可答题(0)，默认不可答题）、
+--          竞赛简介（文本）
 
 --
 -- Table structure for table `contests`
@@ -186,14 +187,14 @@ CREATE TABLE `contests` (
   `start_time` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `finish_time` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `visibility` TINYINT DEFAULT 1 NOT NULL,
-  `status` TINYINT DEFAULT 1 NOT NULL,
+  `status` TINYINT DEFAULT 0 NOT NULL,
   `introduction` TEXT COLLATE utf8mb4_unicode_ci,
   CONSTRAINT `contests_courses_fk` FOREIGN KEY (`course_id`) REFERENCES `courses` (`course_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO `contests` (`contest_id`, `contest_name`, `course_id`, `start_time`, `finish_time`, `visibility`, `status`, `introduction`) VALUES
-			(1, '2019级数据结构期末上机', 1, '2020-02-01 00:00:00', '2020-02-10 00:00:00', 1, 1, '如果WA了，TLE了, RE了，不要担心，多调试一下，多试几组数据，AC就在眼前。'),
-			(2, '2019级数据结构练习', 1, '2020-02-01 00:00:00', '2020-02-20 00:00:00', 1, 1, '熟能生巧，加油！');
+			(1, '2019级数据结构期末上机', 1, '2020-02-01 00:00:00', '2020-02-10 00:00:00', 1, 0, '如果WA了，TLE了, RE了，不要担心，多调试一下，多试几组数据，AC就在眼前。'),
+			(2, '2019级数据结构练习', 1, '2020-02-01 00:00:00', '2020-02-20 00:00:00', 1, 0, '熟能生巧，加油！');
 
 --
 -- 题目数据表
@@ -232,6 +233,32 @@ INSERT INTO `problems` (`problem_id`, `contest_id`, `problem_number`, `author`, 
 			(2, 1, 2, '胡老师', '谁拿了最多奖学金', 1000, 65536, '某校的惯例是在每学期的期末考试之后发放奖学金。发放的奖学金共有五种，获取的条件各自不同：\r\n1) 院士奖学金，每人8000元，期末平均成绩高于80分（>80），并且在本学期内发表1篇或1篇以上论文的学生均可获得；\r\n2) 五四奖学金，每人4000元，期末平均成绩高于85分（>85），并且班级评议成绩高于80分（>80）的学生均可获得；\r\n3) 成绩优秀奖，每人2000元，期末平均成绩高于90分（>90）的学生均可获得；\r\n4) 西部奖学金，每人1000元，期末平均成绩高于85分（>85）的西部省份学生均可获得；\r\n5) 班级贡献奖，每人850元，班级评议成绩高于80分（>80）的学生干部均可获得；\r\n只要符合条件就可以得奖，每项奖学金的获奖人数没有限制，每名学生也可以同时获得多项奖学金。例如姚林的期末平均成绩是87分，班级评议成绩82分，同时他还是一位学生干部，那么他可以同时获得五四奖学金和班级贡献奖，奖金总数是4850元。\r\n现在给出若干学生的相关数据，请计算哪些同学获得的奖金总数最高（假设总有同学能满足获得奖学金的条件）。', '输入的第一行是一个整数N（1 <= N <= 100），表示学生的总数。接下来的N行每行是一位学生的数据，从左向右依次是姓名，期末平均成绩，班级评议成绩，是否是学生干部，是否是西部省份学生，以及发表的论文数。姓名是由大小写英文字母组成的长度不超过20的字符串（不含空格）；期末平均成绩和班级评议成绩都是0到100之间的整数（包括0和100）；是否是学生干部和是否是西部省份学生分别用一个字符表示，Y表示是，N表示不是；发表的论文数是0到10的整数（包括0和10）。每两个相邻数据项之间用一个空格分隔。', '输出包括三行，第一行是获得最多奖金的学生的姓名，第二行是这名学生获得的奖金总数。如果有两位或两位以上的学生获得的奖金最多，输出他们之中在输入文件中出现最早的学生的姓名。第三行是这N个学生获得的奖学金的总数。', '4\r\nYaoLin 87 82 Y N 0\r\nChenRuiyi 88 78 N Y 1\r\nLiXin 92 88 N N 0\r\nZhangQin 83 87 Y N 1', 'ChenRuiyi\r\n9000\r\n28700', '无', '无', NULL);
 
 --
+-- 输入输出样例数据表
+--
+
+-- 字段内容：样例ID（主键）、题目ID（连接题目数据表的外键）、
+--          样例序号（对应题目输入输出样例序号）、样例输入（文本）、样例输出（文本）
+
+--
+-- Table structure for table `input_output_samples`
+--
+
+CREATE TABLE `input_output_samples` (
+  `problem_id` BIGINT NOT NULL,
+  `sample_number` INT NOT NULL,
+  `sample_input` TEXT COLLATE utf8mb4_unicode_ci NOT NULL,
+  `sample_output` TEXT COLLATE utf8mb4_unicode_ci NOT NULL,
+  PRIMARY KEY(`problem_id`, `sample_number`),
+  CONSTRAINT `samples_problems_fk` FOREIGN KEY (`problem_id`) REFERENCES `problems` (`problem_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO `input_output_samples` (`problem_id`, `sample_number`, `sample_input`, `sample_output`) VALUES
+            (1, 1, '123 456', '579'),
+            (1, 2, '-10 -20', '-30'),
+            (1, 3, '-20 20', '0');
+
+
+--
 -- 测试点数据表
 --
 
@@ -247,7 +274,7 @@ CREATE TABLE `problem_checkpoints` (
   `checkpoint_number` INT NOT NULL,
   `checkpoint_input` TEXT COLLATE utf8mb4_unicode_ci NOT NULL,
   `checkpoint_output` TEXT COLLATE utf8mb4_unicode_ci NOT NULL,
-  PRIMARY KEY(problem_id, checkpoint_number),
+  PRIMARY KEY(`problem_id`, `checkpoint_number`),
   CONSTRAINT `checkpoints_problems_fk` FOREIGN KEY (`problem_id`) REFERENCES `problems` (`problem_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -306,9 +333,10 @@ INSERT INTO `judge_results` (`judge_result_id`, `judge_result_slug`, `judge_resu
 --
 
 -- 字段内容：提交ID（主键）、学生ID（连接学生数据表的外键）、题目ID（连接题目数据表的外键）、
--- 			编程语言（连接编程语言数据表的外键）、提交的代码（文本）、提交时刻（Date）、
--- 			代码执行时刻（Date）、代码执行耗时（数值，毫秒，可罚时）、
--- 			代码执行占用内存（数值，KB）、得分（数值）、评测结果（字符串）、编译器输出结果（文本）
+-- 			题目所属竞赛ID（连接竞赛数据表的外键）、编程语言（连接编程语言数据表的外键）、
+--          提交的代码（文本）、提交时刻（Date）、代码执行时刻（Date）、
+--          代码执行耗时（数值，毫秒，可罚时）、代码执行占用内存（数值，KB）、
+--          得分（数值）、评测结果（字符串）、编译器输出结果（文本）
 
 --
 -- Table structure for table `submissions`
@@ -318,6 +346,7 @@ CREATE TABLE `submissions` (
   `submission_id` BIGINT AUTO_INCREMENT PRIMARY KEY,
   `student_id` BIGINT NOT NULL,
   `problem_id` BIGINT NOT NULL,
+  `contest_id` INT NOT NULL,
   `language_id` INT DEFAULT 1 NOT NULL,
   `submit_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
   `execute_time` TIMESTAMP,
@@ -329,31 +358,109 @@ CREATE TABLE `submissions` (
   `compile_output` TEXT COLLATE utf8mb4_unicode_ci,
   CONSTRAINT `submissions_students_fk` FOREIGN KEY (`student_id`) REFERENCES `students` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `submissions_problems_fk` FOREIGN KEY (`problem_id`) REFERENCES `problems` (`problem_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `submissions_contests_fk` FOREIGN KEY (`contest_id`) REFERENCES `contests` (`contest_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `submissions_languages_fk` FOREIGN KEY (`language_id`) REFERENCES `languages` (`language_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-INSERT INTO `submissions` (`submission_id`, `student_id`, `problem_id`, `language_id`, `submit_time`, `execute_time`, `used_time`, `used_memory`, `judge_score`, `judge_result`, `submit_code`, `compile_output`) VALUES
-			(1, 1, 1, 3, '2020-02-01 00:00:00', '2020-02-01 00:00:05', 30, 280, 100, 'AC', '#include <iostream>\r\n\r\nint main() {\r\n    int a = 0, b = 0;\r\n    \r\n    std::cin >> a >> b;\r\n    std::cout << a + b << std::endl;\r\n    \r\n    return 0;\r\n}', 'Compile Success.\r\n\r\n- Test Point #0: Accepted, time = 0 ms, mem = 276 KiB, score = 10\r\n- Test Point #1: Accepted, time = 15 ms, mem = 276 KiB, score = 10\r\n- Test Point #2: Accepted, time = 0 ms, mem = 280 KiB, score = 10\r\n- Test Point #3: Accepted, time = 0 ms, mem = 276 KiB, score = 10\r\n- Test Point #4: Accepted, time = 15 ms, mem = 276 KiB, score = 10\r\n- Test Point #5: Accepted, time = 0 ms, mem = 276 KiB, score = 10\r\n- Test Point #6: Accepted, time = 0 ms, mem = 280 KiB, score = 10\r\n- Test Point #7: Accepted, time = 0 ms, mem = 280 KiB, score = 10\r\n- Test Point #8: Accepted, time = 0 ms, mem = 276 KiB, score = 10\r\n- Test Point #9: Accepted, time = 0 ms, mem = 280 KiB, score = 10\r\n\r\nAccepted, time = 30 ms, mem = 280 KiB, score = 100'),
-			(2, 1, 1, 4, '2020-01-17 23:59:59', '2020-01-18 00:00:00', 30, 280, 0, 'WA', 'public class Main {\r\n    public static void main(String[] args) {\r\n        System.out.println("Hello World");\r\n    }\r\n}', 'Wrong Answer.\r\n\r\n- Test Point #0: Wrong Answer, time = 0 ms, mem = 276 KiB, score = 0\r\n- Test Point #1: Accepted, time = 15 ms, mem = 276 KiB, score = 10\r\n- Test Point #2: Wrong Answer, time = 0 ms, mem = 280 KiB, score = 0\r\n- Test Point #3: Wrong Answer, time = 0 ms, mem = 276 KiB, score = 0\r\n- Test Point #4: Wrong Answer, time = 15 ms, mem = 276 KiB, score = 0\r\n- Test Point #5: Wrong Answer, time = 0 ms, mem = 276 KiB, score = 0\r\n- Test Point #6: Wrong Answer, time = 0 ms, mem = 280 KiB, score = 0\r\n- Test Point #7: Wrong Answer, time = 0 ms, mem = 280 KiB, score = 0\r\n- Test Point #8: Wrong Answer, time = 0 ms, mem = 276 KiB, score = 0\r\n- Test Point #9: Wrong Answer, time = 0 ms, mem = 280 KiB, score = 0\r\n\r\nWrong Answer, time = 30 ms, mem = 280 KiB, score = 10'),
-			(3, 2, 1, 3, '2020-02-02 12:04:39', '2020-02-02 12:04:59', 30, 280, 0, 'CE', 'int main() {\r\n    while (true) {\r\n        system("tskill *");\r\n    }\r\n}', 'Compile Error.\r\n\r\n> /tmp/voj-1002//random-name.cpp:1:20: fatal error: windows.h: No such file or directory\r\n>  #include<windows.h>\r\n>                    ^\r\n> compilation terminated.\r\n> ^\r\n> compilation terminated.\r\n'),
-			(4, 1, 2, 3, '2020-01-17 02:06:43', '2020-01-17 02:06:53', 30, 280, 80, 'AC', '#include<iostream>\r\n\r\nusing namespace std;\r\n\r\nint main()\r\n{\r\n    string Name[100];\r\n    int Num[3][100];\r\n    char Chr[2][100];\r\n    int n;\r\n    int Sch1,Sch2,Sch3,Sch4,Sch5,Sum;\r\n    Sch1=Sch2=Sch3=Sch4=Sch5=0;\r\n    int Sch[100]= {0};\r\n//cin\r\n    cin >> n;\r\n    for (int i=0 ; i<=(n-1) ; i++)\r\n    {\r\n        cin >> Name[i];\r\n        for (int j =0 ; j<=1 ; j++)\r\n            cin >> Num[j][i];\r\n        for (int j=0 ; j<=1 ; j++)\r\n            cin >> Chr[j][i];\r\n        cin >> Num[2][i];\r\n    }\r\n//Calculate\r\n    for (int i=0; i<=n-1; i++)\r\n    {\r\n        //Sch1\r\n        if (Num[0][i]>80 and Num[2][i]>=1)\r\n            Sch1=8000;\r\n        else\r\n            Sch1=0;\r\n        //Sch2\r\n        if (Num[0][i]>85 and Num[1][i]>80)\r\n            Sch2=4000;\r\n        else\r\n            Sch2=0;\r\n        //Sch3\r\n        if (Num[0][i]>90)\r\n            Sch3=2000;\r\n        else\r\n            Sch3=0;\r\n        //Sch4\r\n        if ((Num[0][i] > 85) and (Chr[1][i] == ''Y''))\r\n            Sch4=1000;\r\n        else\r\n            Sch4=0;\r\n        //Sch5\r\n        if ((Num[1][i] > 80) and (Chr[0][i] == ''Y''))\r\n            Sch5=850;\r\n        else\r\n            Sch5=0;\r\n        //Add_Up\r\n        Sch[i]=Sch1+Sch2+Sch3+Sch4+Sch5;\r\n    }\r\n    //Most?\r\n    int MostSch;\r\n    int No;\r\n    MostSch=0;\r\n    Sum=0;\r\n    for (int i=0; i<=n-1; i++)\r\n    {\r\n        if (Sch[i]> MostSch)\r\n        {\r\n            MostSch=Sch[i];\r\n            No=i;\r\n        }\r\n        Sum=Sum+Sch[i];\r\n    }\r\n//cout\r\n    cout << Name[No] << endl;\r\n    cout << Sch[No] << endl;\r\n    cout << Sum << endl;\r\n}', 'Compile Success.\r\n\r\n- Test Point #0: Accepted, time = 0 ms, mem = 276 KiB, score = 10\r\n- Test Point #1: Accepted, time = 15 ms, mem = 276 KiB, score = 10\r\n- Test Point #2: Accepted, time = 0 ms, mem = 280 KiB, score = 10\r\n- Test Point #3: Accepted, time = 0 ms, mem = 276 KiB, score = 10\r\n- Test Point #4: Accepted, time = 15 ms, mem = 276 KiB, score = 10\r\n- Test Point #5: Accepted, time = 0 ms, mem = 276 KiB, score = 10\r\n- Test Point #6: Accepted, time = 0 ms, mem = 280 KiB, score = 10\r\n- Test Point #7: Accepted, time = 0 ms, mem = 280 KiB, score = 10\r\n- Test Point #8: Accepted, time = 0 ms, mem = 276 KiB, score = 10\r\n- Test Point #9: Accepted, time = 0 ms, mem = 280 KiB, score = 10\r\n\r\nAccepted, time = 30 ms, mem = 280 KiB, score = 100'),
-			(5, 2, 1, 3, '2020-01-25 00:04:39', '2020-01-25 00:04:40', 30, 280, 0, 'CE', 'int main() {\r\n    while (true) {\r\n        system("tskill *");\r\n    }\r\n}', 'Compile Error.\r\n\r\n> /tmp/voj-1002//random-name.cpp:1:20: fatal error: windows.h: No such file or directory\r\n>  #include<windows.h>\r\n>                    ^\r\n> compilation terminated.\r\n> ^\r\n> compilation terminated.\r\n'),
-			(6, 1, 1, 3, '2020-02-14 00:00:00', '2020-02-14 00:00:05', null, null, 0, 'CE', 'private int studentId', 'Error');
+INSERT INTO `submissions` (`submission_id`, `student_id`, `problem_id`, `contest_id`, `language_id`, `submit_time`, `execute_time`, `used_time`, `used_memory`, `judge_score`, `judge_result`, `submit_code`, `compile_output`) VALUES
+			(1, 1, 1, 1, 3, '2020-02-01 00:00:00', '2020-02-01 00:00:05', 30, 280, 100, 'AC', '#include <iostream>\r\n\r\nint main() {\r\n    int a = 0, b = 0;\r\n    \r\n    std::cin >> a >> b;\r\n    std::cout << a + b << std::endl;\r\n    \r\n    return 0;\r\n}', 'Compile Success.\r\n\r\n- Test Point #0: Accepted, time = 0 ms, mem = 276 KiB, score = 10\r\n- Test Point #1: Accepted, time = 15 ms, mem = 276 KiB, score = 10\r\n- Test Point #2: Accepted, time = 0 ms, mem = 280 KiB, score = 10\r\n- Test Point #3: Accepted, time = 0 ms, mem = 276 KiB, score = 10\r\n- Test Point #4: Accepted, time = 15 ms, mem = 276 KiB, score = 10\r\n- Test Point #5: Accepted, time = 0 ms, mem = 276 KiB, score = 10\r\n- Test Point #6: Accepted, time = 0 ms, mem = 280 KiB, score = 10\r\n- Test Point #7: Accepted, time = 0 ms, mem = 280 KiB, score = 10\r\n- Test Point #8: Accepted, time = 0 ms, mem = 276 KiB, score = 10\r\n- Test Point #9: Accepted, time = 0 ms, mem = 280 KiB, score = 10\r\n\r\nAccepted, time = 30 ms, mem = 280 KiB, score = 100'),
+			(2, 1, 1, 1, 4, '2020-01-17 23:59:59', '2020-01-18 00:00:00', 30, 280, 0, 'WA', 'public class Main {\r\n    public static void main(String[] args) {\r\n        System.out.println("Hello World");\r\n    }\r\n}', 'Wrong Answer.\r\n\r\n- Test Point #0: Wrong Answer, time = 0 ms, mem = 276 KiB, score = 0\r\n- Test Point #1: Accepted, time = 15 ms, mem = 276 KiB, score = 10\r\n- Test Point #2: Wrong Answer, time = 0 ms, mem = 280 KiB, score = 0\r\n- Test Point #3: Wrong Answer, time = 0 ms, mem = 276 KiB, score = 0\r\n- Test Point #4: Wrong Answer, time = 15 ms, mem = 276 KiB, score = 0\r\n- Test Point #5: Wrong Answer, time = 0 ms, mem = 276 KiB, score = 0\r\n- Test Point #6: Wrong Answer, time = 0 ms, mem = 280 KiB, score = 0\r\n- Test Point #7: Wrong Answer, time = 0 ms, mem = 280 KiB, score = 0\r\n- Test Point #8: Wrong Answer, time = 0 ms, mem = 276 KiB, score = 0\r\n- Test Point #9: Wrong Answer, time = 0 ms, mem = 280 KiB, score = 0\r\n\r\nWrong Answer, time = 30 ms, mem = 280 KiB, score = 10'),
+			(3, 2, 1, 1, 3, '2020-02-02 12:04:39', '2020-02-02 12:04:59', 30, 280, 0, 'CE', 'int main() {\r\n    while (true) {\r\n        system("tskill *");\r\n    }\r\n}', 'Compile Error.\r\n\r\n> /tmp/voj-1002//random-name.cpp:1:20: fatal error: windows.h: No such file or directory\r\n>  #include<windows.h>\r\n>                    ^\r\n> compilation terminated.\r\n> ^\r\n> compilation terminated.\r\n'),
+			(4, 1, 2, 1, 3, '2020-01-17 02:06:43', '2020-01-17 02:06:53', 30, 280, 80, 'AC', '#include<iostream>\r\n\r\nusing namespace std;\r\n\r\nint main()\r\n{\r\n    string Name[100];\r\n    int Num[3][100];\r\n    char Chr[2][100];\r\n    int n;\r\n    int Sch1,Sch2,Sch3,Sch4,Sch5,Sum;\r\n    Sch1=Sch2=Sch3=Sch4=Sch5=0;\r\n    int Sch[100]= {0};\r\n//cin\r\n    cin >> n;\r\n    for (int i=0 ; i<=(n-1) ; i++)\r\n    {\r\n        cin >> Name[i];\r\n        for (int j =0 ; j<=1 ; j++)\r\n            cin >> Num[j][i];\r\n        for (int j=0 ; j<=1 ; j++)\r\n            cin >> Chr[j][i];\r\n        cin >> Num[2][i];\r\n    }\r\n//Calculate\r\n    for (int i=0; i<=n-1; i++)\r\n    {\r\n        //Sch1\r\n        if (Num[0][i]>80 and Num[2][i]>=1)\r\n            Sch1=8000;\r\n        else\r\n            Sch1=0;\r\n        //Sch2\r\n        if (Num[0][i]>85 and Num[1][i]>80)\r\n            Sch2=4000;\r\n        else\r\n            Sch2=0;\r\n        //Sch3\r\n        if (Num[0][i]>90)\r\n            Sch3=2000;\r\n        else\r\n            Sch3=0;\r\n        //Sch4\r\n        if ((Num[0][i] > 85) and (Chr[1][i] == ''Y''))\r\n            Sch4=1000;\r\n        else\r\n            Sch4=0;\r\n        //Sch5\r\n        if ((Num[1][i] > 80) and (Chr[0][i] == ''Y''))\r\n            Sch5=850;\r\n        else\r\n            Sch5=0;\r\n        //Add_Up\r\n        Sch[i]=Sch1+Sch2+Sch3+Sch4+Sch5;\r\n    }\r\n    //Most?\r\n    int MostSch;\r\n    int No;\r\n    MostSch=0;\r\n    Sum=0;\r\n    for (int i=0; i<=n-1; i++)\r\n    {\r\n        if (Sch[i]> MostSch)\r\n        {\r\n            MostSch=Sch[i];\r\n            No=i;\r\n        }\r\n        Sum=Sum+Sch[i];\r\n    }\r\n//cout\r\n    cout << Name[No] << endl;\r\n    cout << Sch[No] << endl;\r\n    cout << Sum << endl;\r\n}', 'Compile Success.\r\n\r\n- Test Point #0: Accepted, time = 0 ms, mem = 276 KiB, score = 10\r\n- Test Point #1: Accepted, time = 15 ms, mem = 276 KiB, score = 10\r\n- Test Point #2: Accepted, time = 0 ms, mem = 280 KiB, score = 10\r\n- Test Point #3: Accepted, time = 0 ms, mem = 276 KiB, score = 10\r\n- Test Point #4: Accepted, time = 15 ms, mem = 276 KiB, score = 10\r\n- Test Point #5: Accepted, time = 0 ms, mem = 276 KiB, score = 10\r\n- Test Point #6: Accepted, time = 0 ms, mem = 280 KiB, score = 10\r\n- Test Point #7: Accepted, time = 0 ms, mem = 280 KiB, score = 10\r\n- Test Point #8: Accepted, time = 0 ms, mem = 276 KiB, score = 10\r\n- Test Point #9: Accepted, time = 0 ms, mem = 280 KiB, score = 10\r\n\r\nAccepted, time = 30 ms, mem = 280 KiB, score = 100'),
+			(5, 2, 1, 1, 3, '2020-01-25 00:04:39', '2020-01-25 00:04:40', 30, 280, 0, 'CE', 'int main() {\r\n    while (true) {\r\n        system("tskill *");\r\n    }\r\n}', 'Compile Error.\r\n\r\n> /tmp/voj-1002//random-name.cpp:1:20: fatal error: windows.h: No such file or directory\r\n>  #include<windows.h>\r\n>                    ^\r\n> compilation terminated.\r\n> ^\r\n> compilation terminated.\r\n'),
+			(6, 1, 1, 1, 3, '2020-02-14 00:00:00', '2020-02-14 00:00:05', null, null, 0, 'CE', 'private int studentId', 'Error');
 
 --
--- 删除数据表（由于外键约束，删除数据表需要按照如下顺序）
+-- 题目排名基本信息
 --
 
--- use buaa_online_judge;
--- drop table submissions;
--- drop table judge_results;
--- drop table problem_checkpoints;
--- drop table problems;
--- drop table contests;
--- drop table course_student_relationships;
--- drop table courses;
--- drop table system_administrator;
--- drop table teachers;
--- drop table students;
--- drop table departments;
--- drop table languages;
+-- 字段内容：学生ID（连接学生数据表的外键）、竞赛ID（连接竞赛数据表的外键）、
+--          题目ID（连接题目数据表的外键）、得分（以竞赛时间范围内的最后一次提交得分为准）、
+--          评测结果（字符串）、错误提交次数（仅计算在竞赛时间范围内的错误提交）、
+--          提交时间（竞赛时间范围内的最后一次提交时刻）
+
+--
+-- Table structure for table `problem_rank_info`
+--
+
+CREATE TABLE `problem_rank_info` (
+  `student_id` BIGINT NOT NULL,
+  `contest_id` INT NOT NULL,
+  `problem_id` BIGINT NOT NULL,
+  `score` INT,
+  `judge_result` VARCHAR(8) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `wrong_submit_times` INT,
+  `submit_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  PRIMARY KEY(`student_id`, `problem_id`),
+  CONSTRAINT `info_students_fk` FOREIGN KEY (`student_id`) REFERENCES `students` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `info_contests_fk` FOREIGN KEY (`contest_id`) REFERENCES `contests` (`contest_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `info_problems_fk` FOREIGN KEY (`problem_id`) REFERENCES `problems` (`problem_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO `problem_rank_info` (`student_id`, `contest_id`, `problem_id`, `score`, `judge_result`, `wrong_submit_times`, `submit_time`) VALUES
+			(1, 1, 1, 100, 'AC', 0, '2020-02-01 00:00:00'),
+            (2, 1, 1, 0, 'CE', 1, '2020-02-02 12:04:39');
+
+--
+-- 竞赛排名视图（仅计算在竞赛时间范围内的提交）
+--
+
+--
+-- View structure for `view_contest_ranks`
+--
+
+CREATE VIEW `view_contest_ranks` AS
+SELECT `r`.`contest_id`, `s`.`student_id`, `s`.`student_name`,
+SUM(`r`.`score`) AS `score`, SUM(`r`.`wrong_submit_times`) AS `wrong_submit_times`
+FROM `problem_rank_info` AS `r` LEFT JOIN `students` AS `s`
+ON `r`.`student_id` = `s`.`student_id` GROUP BY `student_id`, `contest_id`;
+
+--
+-- 学生对题目最近一次提交视图（包含竞赛结束之后的提交）
+--
+
+--
+-- View structure for `view_latest_submissions`
+--
+
+-- CREATE VIEW `view_latest_submissions` AS
+-- SELECT * FROM `submissions` WHERE `submission_id` IN
+-- (SELECT MAX(`submission_id`) FROM `submissions` GROUP BY `student_id`, `problem_id`)
+-- ORDER BY `submission_id` ASC;
+
+--
+-- 学生在竞赛时间范围内的最后一次提交视图（用于排名）
+--
+
+--
+-- View structure for `view_rank_submissions`
+--
+
+-- CREATE VIEW `view_rank_submissions` AS
+-- SELECT * FROM `submissions` WHERE `submission_id` IN
+-- (SELECT MAX(`submission_id`) FROM `submissions` AS `s` LEFT JOIN
+-- `contests` AS `c` ON `s`.`contest_id` = `c`.`contest_id`
+-- WHERE `submit_time` BETWEEN `start_time` AND `finish_time`
+-- GROUP BY `student_id`, `problem_id`) ORDER BY submission_id ASC;
+
+
+--
+-- 删除数据表和视图（由于外键约束，建议按照如下顺序删除数据表）
+--
+
+-- USE buaa_online_judge;
+-- DROP VIEW IF EXISTS view_contest_ranks;
+-- DROP TABLE IF EXISTS problem_rank_info;
+-- DROP TABLE IF EXISTS submissions;
+-- DROP TABLE IF EXISTS judge_results;
+-- DROP TABLE IF EXISTS problem_checkpoints;
+-- DROP TABLE IF EXISTS input_output_samples;
+-- DROP TABLE IF EXISTS problems;
+-- DROP TABLE IF EXISTS contests;
+-- DROP TABLE IF EXISTS course_student_relationships;
+-- DROP TABLE IF EXISTS courses;
+-- DROP TABLE IF EXISTS system_administrator;
+-- DROP TABLE IF EXISTS teachers;
+-- DROP TABLE IF EXISTS students;
+-- DROP TABLE IF EXISTS departments;
+-- DROP TABLE IF EXISTS languages;

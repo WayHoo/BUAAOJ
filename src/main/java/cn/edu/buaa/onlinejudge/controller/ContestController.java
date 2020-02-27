@@ -1,8 +1,6 @@
 package cn.edu.buaa.onlinejudge.controller;
 
-import cn.edu.buaa.onlinejudge.model.Contest;
-import cn.edu.buaa.onlinejudge.model.Course;
-import cn.edu.buaa.onlinejudge.model.Problem;
+import cn.edu.buaa.onlinejudge.model.*;
 import cn.edu.buaa.onlinejudge.service.ContestService;
 import cn.edu.buaa.onlinejudge.service.CourseService;
 import cn.edu.buaa.onlinejudge.service.ProblemService;
@@ -13,7 +11,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -56,11 +53,104 @@ public class ContestController {
         if( pageSize < 0 || pageIndex < 0 ) {
             return new HttpResponseWrapperUtil(null, -1, "failure");
         }
-        List<Contest> contestList = contestService.getPageContests(pageSize,pageIndex);
+        List<Contest> contestList = contestService.getPageVisibleContests(pageSize,pageIndex);
         List<Map<String,Object>> contests = wrapContests2Json(contestList);
         Map<String,Object> data = new HashMap<>();
         data.put("contests",contests);
         data.put("totalContestsNum",contestService.getTotalContestsNum());
+        return new HttpResponseWrapperUtil(data);
+    }
+
+    @ApiOperation("学生进入竞赛接口")
+    @GetMapping(value = "/enterContest/{studentId}/{contestId}")
+    public HttpResponseWrapperUtil enterContest(@PathVariable("studentId") long studentId,
+                                                @PathVariable("contestId") int contestId) {
+        Contest contest = contestService.getContestById(contestId);
+        if( contest == null ){
+            return new HttpResponseWrapperUtil(null, -1, "竞赛不存在");
+        }
+        if( !contest.isVisible() ){
+            return new HttpResponseWrapperUtil(null, -1, "竞赛不可见");
+        }
+        if( DateUtil.getCurrentTimestamp().before(contest.getStartTime()) ){
+            return new HttpResponseWrapperUtil(null, -1, "竞赛尚未开始");
+        }
+        Map<String,Object> data = new HashMap<>();
+        data.put("introduction",contest.getIntroduction());
+        data.put("finishTime",DateUtil.formatTimestamp(contest.getFinishTime()));
+        data.put("contestStatus",judgeContestStatus(contest.getStartTime(),contest.getFinishTime()));
+        data.put("isAnswerable", contest.isAnswerable() ? 1 : 0);
+        data.put("serverCurrentTime",DateUtil.getCurrentTime());
+        List<Problem> problemList = problemService.getVisibleProblemsOfContest(contestId);
+        List<Object> problemIdList = new ArrayList<>();
+        for (Problem problem : problemList) {
+            Map<String,Object> metadata = new HashMap<>();
+            metadata.put("problemId",problem.getProblemId());
+            metadata.put("status",submissionService.getSubmissionStatus(studentId,problem.getProblemId()));
+            problemIdList.add(metadata);
+        }
+        data.put("problemIdList",problemIdList);
+        return new HttpResponseWrapperUtil(data);
+    }
+
+    @ApiOperation("学生查看竞赛排名接口")
+    @GetMapping(value = "/getContestPageRanks/{pageSize}/{pageIndex}/{contestId}")
+    public HttpResponseWrapperUtil getContestPageRanks(@PathVariable("pageSize") int pageSize,
+                                                       @PathVariable("pageIndex") int pageIndex,
+                                                       @PathVariable("contestId") int contestId) {
+        if( pageSize < 0 || pageIndex < 0 ) {
+            return new HttpResponseWrapperUtil(null, -1, "分页参数错误");
+        }
+        List<Problem> problemList = problemService.getVisibleProblemsOfContest(contestId);
+        if( problemList == null || problemList.size() == 0 ){
+            return new HttpResponseWrapperUtil(null, -1, "该竞赛无排名");
+        }
+        Map<String,Object> data = new HashMap<>();
+        List<Object> acceptRate = new ArrayList<>();
+        for (Problem problem : problemList) {
+            Map<String,Object> metadata = new HashMap<>();
+            metadata.put("problemNumber", problem.getProblemNumber());
+            metadata.put("acceptStudents", submissionService.getProblemAcceptStudents(problem.getProblemId()));
+            metadata.put("submitStudents", submissionService.getProblemSubmitStudents(problem.getProblemId()));
+            acceptRate.add(metadata);
+        }
+        data.put("acceptRate", acceptRate);
+        List<ContestRank> contestRankList = contestService.getContestPageRanks(pageSize, pageIndex, contestId);
+        List<Object> ranks = new ArrayList<>();
+        for (ContestRank contestRank : contestRankList) {
+            Map<String,Object> metadata = new HashMap<>();
+            metadata.put("studentName", contestRank.getStudentName());
+            metadata.put("score", contestRank.getScore());
+            metadata.put("timePenalty", contestRank.getWrongSubmitTimes() * ContestRank.TIME_PENALTY);
+            List<Object> submitInfo = new ArrayList<>();
+            for (Problem problem : problemList) {
+                Map<String,Object> submitInfoMetadata = new HashMap<>();
+                ProblemRankInfo problemRankInfo =
+                        submissionService.getProblemRankInfo(contestRank.getStudentId(), problem.getProblemId());
+                submitInfoMetadata.put("problemNumer", problem.getProblemNumber());
+                int status = 0;//未提交
+                Timestamp submitTime = null;
+                int wrongSubmitTimes = 0;
+                if( problemRankInfo != null ){
+                    if( "AC".equals(problemRankInfo.getJudgeResult()) ){
+                        status = 2;//完全正确
+                    } else if( problemRankInfo.getScore() > 0 ){
+                        status = 1;//部分正确
+                    } else{
+                        status = -1;//错误
+                    }
+                    submitTime = problemRankInfo.getSubmitTime();
+                    wrongSubmitTimes = problemRankInfo.getWrongSubmitTimes();
+                }
+                submitInfoMetadata.put("status", status);
+                submitInfoMetadata.put("submitTime", DateUtil.formatTimestamp(submitTime));
+                submitInfoMetadata.put("wrongSubmitTimes", wrongSubmitTimes);
+                submitInfo.add(submitInfoMetadata);
+            }
+            metadata.put("submitInfo", submitInfo);
+            ranks.add(metadata);
+        }
+        data.put("ranks", ranks);
         return new HttpResponseWrapperUtil(data);
     }
 
@@ -97,6 +187,21 @@ public class ContestController {
         Map<String,Object> data = new HashMap<>();
         data.put("contestId", contest.getContestId());
         return new HttpResponseWrapperUtil(data);
+    }
+
+    @ApiOperation("教师删除竞赛接口")
+    @GetMapping(value = "/deleteContest/{courseId}/{contestId}")
+    public HttpResponseWrapperUtil deleteContest(@PathVariable("courseId") int courseId,
+                                                 @PathVariable("contestId") int contestId) {
+        Contest contest = contestService.getContestById(contestId);
+        if( contest == null ){
+            return new HttpResponseWrapperUtil(null, -1, "竞赛不存在");
+        }
+        if( contest.getCourseId() != courseId ){
+            return new HttpResponseWrapperUtil(null, -1, "权限不足");
+        }
+        contestService.deleteContest(contestId);
+        return new HttpResponseWrapperUtil(null);
     }
 
     @ApiOperation("教师反转竞赛可见性接口")
@@ -158,32 +263,6 @@ public class ContestController {
         }
         contestService.updateContest(contest);
         return new HttpResponseWrapperUtil(null);
-    }
-
-    @ApiOperation("学生进入竞赛接口")
-    @GetMapping(value = "/enterContest/{studentId}/{contestId}")
-    public HttpResponseWrapperUtil enterContest(@PathVariable("studentId") long studentId,
-                                                @PathVariable("contestId") int contestId) {
-        Contest contest = contestService.getContestById(contestId);
-        if( contest == null || !contest.isVisible() || !contest.isAnswerable() ||
-                DateUtil.getCurrentTimestamp().before(contest.getStartTime())){
-            return new HttpResponseWrapperUtil(null, -1, "failure");
-        }
-        Map<String,Object> data = new HashMap<>();
-        data.put("introduction",contest.getIntroduction());
-        data.put("finishTime",DateUtil.formatTimestamp(contest.getFinishTime()));
-        data.put("contestStatus",judgeContestStatus(contest.getStartTime(),contest.getFinishTime()));
-        data.put("serverCurrentTime",DateUtil.getCurrentTime());
-        List<Problem> problemList = problemService.getProblemsOfContest(contestId);
-        List<Object> problemIdList = new ArrayList<>();
-        for (Problem problem : problemList) {
-            Map<String,Object> metadata = new HashMap<>();
-            metadata.put("problemId",problem.getProblemId());
-            metadata.put("status",submissionService.getSubmissionStatus(studentId,problem.getProblemId()));
-            problemIdList.add(metadata);
-        }
-        data.put("problemIdList",problemIdList);
-        return new HttpResponseWrapperUtil(data);
     }
 
     /**

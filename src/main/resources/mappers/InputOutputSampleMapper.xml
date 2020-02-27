@@ -16,4 +16,13 @@
             resultMap="InputOutputSampleResultMap" useCache="true">
         SELECT * FROM input_output_samples WHERE problem_id = #{problemId};
     </select>
+
+    <insert id="insertInputOutputSample" parameterType="InputOutputSample" flushCache="true">
+        INSERT INTO input_output_samples (problem_id, sample_number, sample_input, sample_output)
+        VALUES (#{problemId}, #{sampleNumber}, #{sampleInput}, #{sampleOutput});
+    </insert>
+
+    <delete id="deleteInputOutputSamplesOfProblem" parameterType="long" flushCache="true">
+        DELETE FROM input_output_samples WHERE problem_id = #{problemId};
+    </delete>
 </mapper>

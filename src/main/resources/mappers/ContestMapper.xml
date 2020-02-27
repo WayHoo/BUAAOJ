@@ -33,12 +33,12 @@
     </select>
 
     <!--注意：在MyBatis中使用乘法运算需要将表达式置于${}之中，否则会报错-->
-    <select id="getPageContests" parameterType="Map" resultMap="ContestResultMap" useCache="true">
-        SELECT * FROM contests LIMIT #{pageSize} OFFSET ${pageIndex * pageSize};
+    <select id="getPageVisibleContests" parameterType="Map" resultMap="ContestResultMap" useCache="true">
+        SELECT * FROM contests WHERE visibility = 1 LIMIT #{pageSize} OFFSET ${pageIndex * pageSize};
     </select>
 
-    <select id="getContestIdListByCourseIdList" parameterType="List" resultType="int" useCache="true">
-        SELECT contest_id FROM contests WHERE course_id IN
+    <select id="getVisibleContestIdListByCourseIdList" parameterType="List" resultType="int" useCache="true">
+        SELECT contest_id FROM contests WHERE visibility = 1 AND course_id IN
         <choose>
             <when test="list != null and list.size() > 0">
                 <foreach collection="list" item="courseId" separator="," open="(" close=")">
@@ -75,4 +75,8 @@
         </set>
         WHERE contest_id = #{contestId};
     </update>
+
+    <delete id="deleteContest" parameterType="int" flushCache="true">
+        DELETE FROM contests WHERE contest_id = #{contestId};
+    </delete>
 </mapper>
