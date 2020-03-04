@@ -192,16 +192,17 @@ CREATE TABLE `contests` (
   CONSTRAINT `contests_courses_fk` FOREIGN KEY (`course_id`) REFERENCES `courses` (`course_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-INSERT INTO `contests` (`contest_id`, `contest_name`, `course_id`, `start_time`, `finish_time`, `visibility`, `status`, `introduction`) VALUES
-			(1, '2019级数据结构期末上机', 1, '2020-02-01 00:00:00', '2020-02-10 00:00:00', 1, 0, '如果WA了，TLE了, RE了，不要担心，多调试一下，多试几组数据，AC就在眼前。'),
-			(2, '2019级数据结构练习', 1, '2020-02-01 00:00:00', '2020-02-20 00:00:00', 1, 0, '熟能生巧，加油！');
+INSERT INTO `contests` (`contest_id`, `contest_name`, `course_id`, `start_time`, `finish_time`, `introduction`) VALUES
+			(1, '2019级数据结构期末上机', 1, '2020-02-01 00:00:00', '2020-02-10 00:00:00', '如果WA了，TLE了, RE了，不要担心，多调试一下，多试几组数据，AC就在眼前。'),
+			(2, '2019级数据结构练习', 1, '2020-02-01 00:00:00', '2020-02-20 00:00:00', '熟能生巧，加油！');
 
 --
 -- 题目数据表
 --
 
--- 字段内容：题目ID（主键）、所属竞赛（竞赛数据表的外键）、题号（数值）、评测机制（在线评测0，人工评测1）
--- 			作者（字符串）、题目名称（字符串）、时间限制（数值，毫秒）、内存限制（数值，KB）、
+-- 字段内容：题目ID（主键）、所属竞赛（竞赛数据表的外键）、题号（数值）、
+--          可见性（可见(1)，不可见(0)）、评测机制（在线评测0，人工评测1）、作者（字符串）、
+--          题目名称（字符串）、时间限制（数值，毫秒）、内存限制（数值，KB）、
 -- 			题目描述（文本）、输入格式（文本）、输出格式（文本）、输入样例（文本）、
 -- 			输出样例（文本）、样例解释（文本）、提示（文本）、代码（文本，用于填空题）
 
@@ -212,6 +213,7 @@ CREATE TABLE `problems` (
   `problem_id` BIGINT AUTO_INCREMENT PRIMARY KEY,
   `contest_id` INT NOT NULL,
   `problem_number` TINYINT NOT NULL,
+  `visibility` TINYINT DEFAULT 1 NOT NULL,
   `judge_mechanism` TINYINT DEFAULT 0 NOT NULL,
   `author` VARCHAR(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `problem_name` VARCHAR(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -410,7 +412,7 @@ INSERT INTO `problem_rank_info` (`student_id`, `contest_id`, `problem_id`, `scor
 --
 
 CREATE VIEW `view_contest_ranks` AS
-SELECT `r`.`contest_id`, `s`.`student_id`, `s`.`student_name`,
+SELECT `r`.`contest_id`, `s`.`student_id`, `s`.`student_name`, `s`.`student_number`,
 SUM(`r`.`score`) AS `score`, SUM(`r`.`wrong_submit_times`) AS `wrong_submit_times`
 FROM `problem_rank_info` AS `r` LEFT JOIN `students` AS `s`
 ON `r`.`student_id` = `s`.`student_id` GROUP BY `student_id`, `contest_id`;
