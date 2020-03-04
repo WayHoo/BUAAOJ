@@ -31,8 +31,16 @@ public class CourseService {
         return courseMapper.getAllCourses();
     }
 
+    public List<Course> getCoursesByCourseName(String courseName){
+        return courseMapper.getCoursesByCourseName(courseName);
+    }
+
     public List<Course> getCoursesOfTeacher(long teacherId){
         return courseMapper.getAllCoursesByTeacherId(teacherId);
+    }
+
+    public List<Course> getCoursesOfTeacherByCourseName(long teacherId, String courseName){
+        return courseMapper.getCoursesOfTeacherByCourseName(teacherId, courseName);
     }
 
     public Course getCourseById(int courseId) {

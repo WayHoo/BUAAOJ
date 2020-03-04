@@ -22,6 +22,11 @@ public class ContestRank {
     private String studentName;
 
     /**
+     * 学号
+     */
+    private String studentNumber;
+
+    /**
      * 学生在竞赛中所得分数
      */
     private int score;
@@ -30,6 +35,11 @@ public class ContestRank {
      * 学生在竞赛中的罚时
      */
     private int wrongSubmitTimes;
+
+    /**
+     * 排名值
+     */
+    private int rankNum;
 
     public ContestRank() { }
 
@@ -57,6 +67,14 @@ public class ContestRank {
         this.studentName = studentName;
     }
 
+    public String getStudentNumber() {
+        return studentNumber;
+    }
+
+    public void setStudentNumber(String studentNumber) {
+        this.studentNumber = studentNumber;
+    }
+
     public int getScore() {
         return score;
     }
@@ -71,5 +89,26 @@ public class ContestRank {
 
     public void setWrongSubmitTimes(int wrongSubmitTimes) {
         this.wrongSubmitTimes = wrongSubmitTimes;
+    }
+
+    public int getRankNum() {
+        return rankNum;
+    }
+
+    public void setRankNum(int rankNum) {
+        this.rankNum = rankNum;
+    }
+
+    @Override
+    public String toString() {
+        return "ContestRank{" +
+                "contestId=" + contestId +
+                ", studentId=" + studentId +
+                ", studentName='" + studentName + '\'' +
+                ", studentNumber='" + studentNumber + '\'' +
+                ", score=" + score +
+                ", wrongSubmitTimes=" + wrongSubmitTimes +
+                ", rankNum=" + rankNum +
+                '}';
     }
 }

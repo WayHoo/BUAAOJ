@@ -37,6 +37,10 @@
         SELECT * FROM contests WHERE visibility = 1 LIMIT #{pageSize} OFFSET ${pageIndex * pageSize};
     </select>
 
+    <select id="fuzzyQueryVisibleContestsByName" parameterType="String" resultMap="ContestResultMap" useCache="true">
+        SELECT * FROM contests WHERE visibility = 1 AND contest_name LIKE CONCAT(#{contestName}, '%');
+    </select>
+
     <select id="getVisibleContestIdListByCourseIdList" parameterType="List" resultType="int" useCache="true">
         SELECT contest_id FROM contests WHERE visibility = 1 AND course_id IN
         <choose>

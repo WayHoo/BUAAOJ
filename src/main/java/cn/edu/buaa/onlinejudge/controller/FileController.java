@@ -1,7 +1,9 @@
 package cn.edu.buaa.onlinejudge.controller;
 
 import cn.edu.buaa.onlinejudge.model.Course;
+import cn.edu.buaa.onlinejudge.model.Problem;
 import cn.edu.buaa.onlinejudge.service.CourseService;
+import cn.edu.buaa.onlinejudge.service.ProblemService;
 import cn.edu.buaa.onlinejudge.service.TeacherService;
 import cn.edu.buaa.onlinejudge.utils.FileUtil;
 import cn.edu.buaa.onlinejudge.utils.HttpResponseWrapperUtil;
@@ -32,51 +34,56 @@ public class FileController {
     @Autowired
     private CourseService courseService;
 
+    @Autowired
+    private ProblemService problemService;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(FileController.class);
 
-    /**
-     * 完成上传之后将上传文件夹的根目录中所有文件打包并放在根目录下
-     * @param teacherId - 教师ID
-     * @param file - 文件key值
-     * @return
-     */
-    @ApiOperation("上传单个文件接口")
-    @PostMapping(value = "/singleUpload/{teacherId}/{courseId}")
-    public HttpResponseWrapperUtil singleUpload(@PathVariable("teacherId") long teacherId,
-                                                @PathVariable("courseId") int courseId,
-                                                @RequestParam("file") MultipartFile file){
-        Course course = courseService.getCourseById(courseId);
-        if( course == null ){
-            return new HttpResponseWrapperUtil(null, -1, "课程不存在");
+    @ApiOperation("上传题目测试用例接口")
+    @PostMapping(value = "/uploadProblemCheckpoints/{contestId}/{problemId}")
+    public HttpResponseWrapperUtil singleUpload(@PathVariable("contestId") int contestId,
+                                                @PathVariable("problemId") long problemId,
+                                                @RequestParam("checkpoint") MultipartFile checkpoint){
+        Problem problem = problemService.getProblemById(problemId);
+        if( problem == null ){
+            return new HttpResponseWrapperUtil(null, -1, "题目不存在");
         }
-        if( course.getTeacherId() != teacherId ){
+        if( problem.getContestId() != contestId ){
             return new HttpResponseWrapperUtil(null, -1, "上传权限不足");
         }
-        if( file.isEmpty() ){
+        if( checkpoint.isEmpty() ){
             return new HttpResponseWrapperUtil(null, -1, "上传失败，请选择文件");
         }
-        //获取文件名
-        String fileName = file.getOriginalFilename();
-        //设置文件存储路径（Windows环境）
-        String filePath = FileUtil.getUploadPath(Integer.toString(courseId));
-        File dest = FileUtil.getFileDest(filePath,fileName);
-        try {
-            file.transferTo(dest);
-            LOGGER.info("上传成功");
-            toZip(filePath);
-            return new HttpResponseWrapperUtil(null,200,"上传成功");
-        } catch (IOException e) {
-            LOGGER.info("上传失败");
-            e.printStackTrace();
-        }
-        return new HttpResponseWrapperUtil(null, -1, "上传失败");
+        return null;
+//        //获取文件名
+//        String fileName = file.getOriginalFilename();
+//        //设置文件存储路径（Windows环境）
+//        String filePath = FileUtil.getUploadPath(Integer.toString(courseId));
+//        File dest = FileUtil.getFileDest(filePath,fileName);
+//        try {
+//            file.transferTo(dest);
+//            LOGGER.info("上传成功");
+//            toZip(filePath);
+//            return new HttpResponseWrapperUtil(null,200,"上传成功");
+//        } catch (IOException e) {
+//            LOGGER.info("上传失败");
+//            e.printStackTrace();
+//        }
+//        return new HttpResponseWrapperUtil(null, -1, "上传失败");
     }
 
+    /**
+     * 完成上传之后将课件文件夹中的所有文件打包为ZIP并存放于课件文件夹中，便于下载课件
+     * @param teacherId - 教师ID
+     * @param courseId - 课程ID
+     * @param request
+     * @return
+     */
     @ApiOperation("上传课件接口")
     @PostMapping("/uploadCourseware/{teacherId}/{courseId}")
     public HttpResponseWrapperUtil uploadCourseware(@PathVariable("teacherId") long teacherId,
-                                               @PathVariable("courseId") int courseId,
-                                               HttpServletRequest request){
+                                                    @PathVariable("courseId") int courseId,
+                                                    HttpServletRequest request){
         Course course = courseService.getCourseById(courseId);
         if( course == null ){
             return new HttpResponseWrapperUtil(null, -1, "课程不存在");
@@ -167,13 +174,6 @@ public class FileController {
             }
         }
         LOGGER.info("下载失败");
-    }
-
-    @ApiOperation("获取项目根目录接口")
-    @GetMapping("/getProjectRootDir")
-    public HttpResponseWrapperUtil getProjectRootDir(){
-        LOGGER.info("ProjectRootDir = " + FileUtil.getProjectRootDir());
-        return new HttpResponseWrapperUtil(null,200, FileUtil.getProjectRootDir());
     }
 
     /**

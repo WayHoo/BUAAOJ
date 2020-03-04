@@ -1,6 +1,7 @@
 package cn.edu.buaa.onlinejudge.mapper;
 
 import cn.edu.buaa.onlinejudge.model.Problem;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -52,4 +53,11 @@ public interface ProblemMapper {
      * @param problemId - 题目ID
      */
     void deleteProblem(long problemId);
+
+    /**
+     * 设置题目的可见性
+     * @param problemId - 题目ID
+     * @param visibility - 可见性值（可见1，不可见0）
+     */
+    void setProblemVisibility(@Param("problemId") long problemId, @Param("visibility") int visibility);
 }

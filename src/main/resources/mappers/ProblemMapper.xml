@@ -80,4 +80,8 @@
         </set>
         WHERE problem_id = #{problemId};
     </update>
+
+    <update id="setProblemVisibility" parameterType="Map" flushCache="true">
+        UPDATE problems SET visibility = #{visibility} WHERE problem_id = #{problemId};
+    </update>
 </mapper>

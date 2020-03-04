@@ -33,6 +33,13 @@ public class ContestService {
        return contestMapper.getPageVisibleContests(pageSize,pageIndex);
    }
 
+   public List<Contest> fuzzyQueryVisibleContestsByName(String contestName){
+       if( contestName == null || contestName.length() == 0 ){
+           return null;
+       }
+       return contestMapper.fuzzyQueryVisibleContestsByName(contestName);
+   }
+
    public List<Integer> getVisibleContestIdListByCourseIdList(List<Integer> courseIdList) {
        return contestMapper.getVisibleContestIdListByCourseIdList(courseIdList);
    }
@@ -59,7 +66,18 @@ public class ContestService {
        return contestMapper.getContestPageRanks(pageSize, pageIndex, contestId);
    }
 
+   public List<ContestRank> getContestLimitRanks(int contestId, int limit){
+       return contestMapper.getContestLimitRanks(contestId, limit);
+   }
+
    public void deleteContest(int contestId){
        contestMapper.deleteContest(contestId);
+   }
+
+   public List<ContestRank> getContestRankByStudentName(int contestId, String studentName) {
+       if( studentName == null || studentName.length() == 0 ) {
+           return null;
+       }
+       return contestMapper.getContestRankByStudentName(contestId, studentName);
    }
 }

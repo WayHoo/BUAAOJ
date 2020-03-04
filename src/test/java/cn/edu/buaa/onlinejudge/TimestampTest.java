@@ -2,7 +2,6 @@ package cn.edu.buaa.onlinejudge;
 
 import cn.edu.buaa.onlinejudge.model.Contest;
 import cn.edu.buaa.onlinejudge.service.ContestService;
-import cn.edu.buaa.onlinejudge.utils.DateUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 

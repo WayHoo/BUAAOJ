@@ -88,11 +88,17 @@ public class SubmissionController {
     @PostMapping(value = "/submitCode")
     public HttpResponseWrapperUtil submitCode(@RequestBody Submission submission) {
         submission.setSubmitTime(DateUtil.getCurrentTimestamp());
+        Problem problem = problemService.getProblemById(submission.getProblemId());
+        if( problem == null ){
+            return new HttpResponseWrapperUtil(null, -1, "题目不存在");
+        }
+        submission.setContestId(problem.getContestId());
         submissionService.insertSubmission(submission);
         if( submission.getSubmissionId() > 0 ){
             //提交ID进入队列
             //判题
             //插入problem_rank_info数据表
+            /**
             ProblemRankInfo problemRankInfo = submissionService.getProblemRankInfo(submission.getStudentId(), submission.getProblemId());
             if( problemRankInfo == null ){
                 int wrongSubmitTimes = 0;
@@ -113,6 +119,7 @@ public class SubmissionController {
                 }
                 submissionService.updateProblemRankInfo(problemRankInfo);
             }
+             **/
             Map<String,Object> data = wrapSubmission2Json(submission);
             return new HttpResponseWrapperUtil(data);
         }else{

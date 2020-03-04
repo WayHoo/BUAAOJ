@@ -61,6 +61,18 @@ public class ContestController {
         return new HttpResponseWrapperUtil(data);
     }
 
+    @ApiOperation("学生根据竞赛名称模糊查找竞赛接口")
+    @PostMapping(value = "/fuzzyQueryContestsByName")
+    public HttpResponseWrapperUtil fuzzyQueryContestsByName(@RequestParam("contestName") String contestName) {
+
+        List<Contest> contestList = contestService.fuzzyQueryVisibleContestsByName(contestName);
+        if( contestList == null || contestList.size() == 0 ){
+            return new HttpResponseWrapperUtil(null, -1, "未查询到相关数据");
+        }
+        List<Map<String,Object>> data = wrapContests2Json(contestList);
+        return new HttpResponseWrapperUtil(data);
+    }
+
     @ApiOperation("学生进入竞赛接口")
     @GetMapping(value = "/enterContest/{studentId}/{contestId}")
     public HttpResponseWrapperUtil enterContest(@PathVariable("studentId") long studentId,
@@ -101,57 +113,20 @@ public class ContestController {
         if( pageSize < 0 || pageIndex < 0 ) {
             return new HttpResponseWrapperUtil(null, -1, "分页参数错误");
         }
-        List<Problem> problemList = problemService.getVisibleProblemsOfContest(contestId);
-        if( problemList == null || problemList.size() == 0 ){
-            return new HttpResponseWrapperUtil(null, -1, "该竞赛无排名");
-        }
-        Map<String,Object> data = new HashMap<>();
-        List<Object> acceptRate = new ArrayList<>();
-        for (Problem problem : problemList) {
-            Map<String,Object> metadata = new HashMap<>();
-            metadata.put("problemNumber", problem.getProblemNumber());
-            metadata.put("acceptStudents", submissionService.getProblemAcceptStudents(problem.getProblemId()));
-            metadata.put("submitStudents", submissionService.getProblemSubmitStudents(problem.getProblemId()));
-            acceptRate.add(metadata);
-        }
-        data.put("acceptRate", acceptRate);
         List<ContestRank> contestRankList = contestService.getContestPageRanks(pageSize, pageIndex, contestId);
-        List<Object> ranks = new ArrayList<>();
-        for (ContestRank contestRank : contestRankList) {
-            Map<String,Object> metadata = new HashMap<>();
-            metadata.put("studentName", contestRank.getStudentName());
-            metadata.put("score", contestRank.getScore());
-            metadata.put("timePenalty", contestRank.getWrongSubmitTimes() * ContestRank.TIME_PENALTY);
-            List<Object> submitInfo = new ArrayList<>();
-            for (Problem problem : problemList) {
-                Map<String,Object> submitInfoMetadata = new HashMap<>();
-                ProblemRankInfo problemRankInfo =
-                        submissionService.getProblemRankInfo(contestRank.getStudentId(), problem.getProblemId());
-                submitInfoMetadata.put("problemNumer", problem.getProblemNumber());
-                int status = 0;//未提交
-                Timestamp submitTime = null;
-                int wrongSubmitTimes = 0;
-                if( problemRankInfo != null ){
-                    if( "AC".equals(problemRankInfo.getJudgeResult()) ){
-                        status = 2;//完全正确
-                    } else if( problemRankInfo.getScore() > 0 ){
-                        status = 1;//部分正确
-                    } else{
-                        status = -1;//错误
-                    }
-                    submitTime = problemRankInfo.getSubmitTime();
-                    wrongSubmitTimes = problemRankInfo.getWrongSubmitTimes();
-                }
-                submitInfoMetadata.put("status", status);
-                submitInfoMetadata.put("submitTime", DateUtil.formatTimestamp(submitTime));
-                submitInfoMetadata.put("wrongSubmitTimes", wrongSubmitTimes);
-                submitInfo.add(submitInfoMetadata);
-            }
-            metadata.put("submitInfo", submitInfo);
-            ranks.add(metadata);
+        return wrapContestRankInfo2Json(contestId, contestRankList);
+    }
+
+    @ApiOperation("学生根据姓名查看竞赛排名接口")
+    @PostMapping(value = "/getContestRankByStudentName")
+    public HttpResponseWrapperUtil getContestRankByStudentName(@RequestParam("contestId") int contestId,
+                                                               @RequestParam("studentName") String studentName) {
+
+        List<ContestRank> contestRankList = contestService.getContestRankByStudentName(contestId, studentName);
+        if( contestRankList == null || contestRankList.size() == 0 ){
+            return new HttpResponseWrapperUtil(null, -1, "未查询到相关信息");
         }
-        data.put("ranks", ranks);
-        return new HttpResponseWrapperUtil(data);
+        return wrapContestRankInfo2Json(contestId, contestRankList);
     }
 
     @ApiOperation("教师查看课程的所有竞赛接口")
@@ -209,6 +184,9 @@ public class ContestController {
     public HttpResponseWrapperUtil reverseContestVisibility(@PathVariable("courseId") int courseId,
                                                             @PathVariable("contestId") int contestId) {
         Contest contest = contestService.getContestById(contestId);
+        if( contest == null ){
+            return new HttpResponseWrapperUtil(null, -1, "竞赛不存在");
+        }
         if( contest.getCourseId() != courseId ){
             return new HttpResponseWrapperUtil(null, -1, "权限不足");
         }
@@ -301,5 +279,69 @@ public class ContestController {
             contestStatus = 2;
         }
         return contestStatus;
+    }
+
+    /**
+     * 将竞赛排名信息封装成JSON数据
+     * @param contestId - 竞赛ID
+     * @param contestRankList - 竞赛排名对象列表
+     * @return JSON数据
+     */
+    public HttpResponseWrapperUtil wrapContestRankInfo2Json(int contestId, List<ContestRank> contestRankList){
+        List<Problem> problemList = problemService.getVisibleProblemsOfContest(contestId);
+        if( problemList == null || problemList.size() == 0 ){
+            return new HttpResponseWrapperUtil(null, -1, "该竞赛无排名信息");
+        }
+        if( contestRankList == null || contestRankList.size() == 0 ){
+            return new HttpResponseWrapperUtil(null, -1, "未查询到相关信息");
+        }
+        Map<String,Object> data = new HashMap<>();
+        List<Object> acceptRate = new ArrayList<>();
+        for (Problem problem : problemList) {
+            Map<String,Object> metadata = new HashMap<>();
+            metadata.put("problemNumber", problem.getProblemNumber());
+            metadata.put("acceptStudents", submissionService.getProblemAcceptStudents(problem.getProblemId()));
+            metadata.put("submitStudents", submissionService.getProblemSubmitStudents(problem.getProblemId()));
+            acceptRate.add(metadata);
+        }
+        data.put("acceptRate", acceptRate);
+        List<Object> ranks = new ArrayList<>();
+        for (ContestRank contestRank : contestRankList) {
+            Map<String,Object> metadata = new HashMap<>();
+            metadata.put("rankNum", contestRank.getRankNum());
+            metadata.put("studentName", contestRank.getStudentName());
+            metadata.put("studentNumber", contestRank.getStudentNumber());
+            metadata.put("score", contestRank.getScore());
+            metadata.put("timePenalty", contestRank.getWrongSubmitTimes() * ContestRank.TIME_PENALTY);
+            List<Object> submitInfo = new ArrayList<>();
+            for (Problem problem : problemList) {
+                Map<String,Object> submitInfoMetadata = new HashMap<>();
+                ProblemRankInfo problemRankInfo =
+                        submissionService.getProblemRankInfo(contestRank.getStudentId(), problem.getProblemId());
+                submitInfoMetadata.put("problemNumer", problem.getProblemNumber());
+                int status = 0;//未提交
+                Timestamp submitTime = null;
+                int wrongSubmitTimes = 0;
+                if( problemRankInfo != null ){
+                    if( "AC".equals(problemRankInfo.getJudgeResult()) ){
+                        status = 2;//完全正确
+                    } else if( problemRankInfo.getScore() > 0 ){
+                        status = 1;//部分正确
+                    } else{
+                        status = -1;//错误
+                    }
+                    submitTime = problemRankInfo.getSubmitTime();
+                    wrongSubmitTimes = problemRankInfo.getWrongSubmitTimes();
+                }
+                submitInfoMetadata.put("status", status);
+                submitInfoMetadata.put("submitTime", DateUtil.formatTimestamp(submitTime));
+                submitInfoMetadata.put("wrongSubmitTimes", wrongSubmitTimes);
+                submitInfo.add(submitInfoMetadata);
+            }
+            metadata.put("submitInfo", submitInfo);
+            ranks.add(metadata);
+        }
+        data.put("ranks", ranks);
+        return new HttpResponseWrapperUtil(data);
     }
 }

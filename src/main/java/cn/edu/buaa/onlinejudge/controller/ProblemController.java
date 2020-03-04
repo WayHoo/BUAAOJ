@@ -58,9 +58,7 @@ public class ProblemController {
         if( pageSize < 0 || pageIndex < 0 ) {
             return new HttpResponseWrapperUtil(null, -1, "分页参数错误");
         }
-        List<Integer> courseIdList = courseService.getStudentJoinedCourseIdList(studentId);
-        List<Integer> contestIdList = contestService.getVisibleContestIdListByCourseIdList(courseIdList);
-        Map<String,Object> problemMap = problemService.getPageVisibleProblemsByContestIdList(contestIdList,pageSize,pageIndex);
+        Map<String,Object> problemMap = problemService.getPageProblemsFromPersonalLibrary(studentId,pageSize,pageIndex);
         List<Problem> problemList = (List<Problem>)problemMap.get("problemList");
         Map<String,Object> data = new HashMap<>();
         data.put("totalProblemNum",problemMap.get("totalProblemNum"));
@@ -77,6 +75,67 @@ public class ProblemController {
             data.put("problems",problems);
         } else {
             data.put("problems",null);
+        }
+        return new HttpResponseWrapperUtil(data);
+    }
+
+    @ApiOperation("学生在题库中根据题目ID搜索题目接口")
+    @GetMapping(value = "/searchProblemById/{studentId}/{problemId}")
+    public HttpResponseWrapperUtil searchProblemById(@PathVariable("studentId") long studentId,
+                                                     @PathVariable("problemId") long problemId) {
+        Problem problem = problemService.getBasicProblemById(problemId);
+        if( problem == null || !problem.isVisible() ){
+            return new HttpResponseWrapperUtil(null, -1, "题目不存在");
+        }
+        Contest contest = contestService.getContestById(problem.getContestId());
+        Course course = courseService.getCourseById(contest.getCourseId());
+        //题库中不会展示学生尚未加入课程中的题目
+        if( courseService.isStudentJoinCourse(studentId, course.getCourseId()) != 1 ){
+            return new HttpResponseWrapperUtil(null, -1, "题目不存在");
+        }
+        Map<String,Object> data = wrapProblemSubmitInfo2Json(problem);
+        data.put("author", problem.getAuthor());
+        data.put("srcContest", contest.getContestName());
+        data.put("srcContestId", contest.getContestId());
+        return new HttpResponseWrapperUtil(data);
+    }
+
+    @ApiOperation("学生在题库中根据题目名称模糊搜索题目接口")
+    @PostMapping(value = "/fuzzySearchProblemsByName")
+    public HttpResponseWrapperUtil fuzzySearchProblemsByName(@RequestParam("studentId") long studentId,
+                                                             @RequestParam("problemName") String problemName) {
+        List<Problem> problemList = problemService.fuzzySearchProblemsByNameFromPersonalLibrary(studentId, problemName);
+        if( problemList == null || problemList.size() == 0 ){
+            return new HttpResponseWrapperUtil(null, -1, "无相关查询数据");
+        }
+        List<Object> data = new ArrayList<>();
+        for (Problem problem : problemList) {
+            Map<String,Object> metadata = wrapProblemSubmitInfo2Json(problem);
+            metadata.put("author",problem.getAuthor());
+            Contest contest = contestService.getContestById(problem.getContestId());
+            metadata.put("srcContest",contest.getContestName());
+            metadata.put("srcContestId",contest.getContestId());
+            data.add(metadata);
+        }
+        return new HttpResponseWrapperUtil(data);
+    }
+
+    @ApiOperation("学生在题库中根据题目作者模糊搜索题目接口")
+    @PostMapping(value = "/fuzzySearchProblemsByAuthor")
+    public HttpResponseWrapperUtil fuzzySearchProblemsByAuthor(@RequestParam("studentId") long studentId,
+                                                               @RequestParam("author") String author) {
+        List<Problem> problemList = problemService.fuzzySearchProblemsByAuthorFromPersonalLibrary(studentId, author);
+        if( problemList == null || problemList.size() == 0 ){
+            return new HttpResponseWrapperUtil(null, -1, "无相关查询数据");
+        }
+        List<Object> data = new ArrayList<>();
+        for (Problem problem : problemList) {
+            Map<String,Object> metadata = wrapProblemSubmitInfo2Json(problem);
+            metadata.put("author",problem.getAuthor());
+            Contest contest = contestService.getContestById(problem.getContestId());
+            metadata.put("srcContest",contest.getContestName());
+            metadata.put("srcContestId",contest.getContestId());
+            data.add(metadata);
         }
         return new HttpResponseWrapperUtil(data);
     }
@@ -182,6 +241,21 @@ public class ProblemController {
             return new HttpResponseWrapperUtil(null, -1, "权限不足");
         }
         problemService.deleteProblem(problemId);
+        return new HttpResponseWrapperUtil(null);
+    }
+
+    @ApiOperation("教师反转题目可见性接口")
+    @GetMapping(value = "/reverseProblemVisibility/{contestId}/{problemId}")
+    public HttpResponseWrapperUtil reverseContestVisibility(@PathVariable("contestId") int contestId,
+                                                            @PathVariable("problemId") long problemId) {
+        Problem problem = problemService.getProblemById(problemId);
+        if( problem == null ){
+            return new HttpResponseWrapperUtil(null, -1, "题目不存在");
+        }
+        if( problem.getContestId() != contestId ){
+            return new HttpResponseWrapperUtil(null, -1, "权限不足");
+        }
+        problemService.reverseProblemVisibility(problemId);
         return new HttpResponseWrapperUtil(null);
     }
 

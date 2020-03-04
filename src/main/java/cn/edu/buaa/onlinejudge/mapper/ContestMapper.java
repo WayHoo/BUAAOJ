@@ -41,9 +41,16 @@ public interface ContestMapper {
      * 对所有可见竞赛按照竞赛ID升序排序，然后获取指定页面大小和页面索引的所有竞赛
      * @param pageSize - 页面大小
      * @param pageIndex - 页面索引，下标从0开始
-     * @return - Contest对象列表
+     * @return Contest对象列表
      */
     List<Contest> getPageVisibleContests(@Param("pageSize") int pageSize, @Param("pageIndex") int pageIndex);
+
+    /**
+     * 通过竞赛名称模糊查询所有可见的竞赛
+     * @param contestName - 竞赛名称
+     * @return Contest对象列表
+     */
+    List<Contest> fuzzyQueryVisibleContestsByName(String contestName);
 
     /**
      * 获取多个课程下的所有竞赛ID
@@ -90,10 +97,22 @@ public interface ContestMapper {
                                           @Param("contestId") int contestId);
 
     /**
+     * 获取指定数量的竞赛排名
+     * @param contestId - 竞赛ID
+     * @param limit - 指定数量
+     * @return ContestRank对象列表
+     */
+    List<ContestRank> getContestLimitRanks(@Param("contestId") int contestId,
+                                           @Param("limit") int limit);
+
+    /**
      * 删除竞赛
      * 由于由于竞赛数据表与题目数据表之间的外键约束关系设置了`ON DELETE CASCADE ON UPDATE CASCADE`，
      * 因此删除竞赛会自动删除竞赛中所有的题目
      * @param contestId - 竞赛ID
      */
     void deleteContest(int contestId);
+
+    List<ContestRank> getContestRankByStudentName(@Param("contestId") int contestId,
+                                                  @Param("studentName") String studentName);
 }

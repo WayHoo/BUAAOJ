@@ -30,6 +30,16 @@ public class CourseController {
         return wrapCourseList2JSON(allCourses);
     }
 
+    @ApiOperation("学生根据课程名称查找课程接口")
+    @PostMapping(value = "/fuzzyQueryCoursesByName")
+    public HttpResponseWrapperUtil fuzzyQueryCoursesByName(@RequestParam("courseName") String courseName) {
+        List<Course> courses = courseService.getCoursesByCourseName(courseName);
+        if( courses == null || courses.size() == 0 ){
+            return new HttpResponseWrapperUtil(null, -1, "无相关查询信息");
+        }
+        return wrapCourseList2JSON(courses);
+    }
+
     @ApiOperation("学生查看课程主页接口")
     @GetMapping(value = "/getCourseHomepage/{studentId}/{courseId}")
     public HttpResponseWrapperUtil getCourseHomepage(@PathVariable("studentId") long studentId,
@@ -86,6 +96,17 @@ public class CourseController {
     @GetMapping(value = "/getCourseList/{teacherId}")
     public HttpResponseWrapperUtil getCourseList(@PathVariable("teacherId") long teacherId) {
         List<Course> courses = courseService.getCoursesOfTeacher(teacherId);
+        return wrapCourseList2JSON(courses);
+    }
+
+    @ApiOperation("教师根据课程名称查找课程接口")
+    @PostMapping(value = "/fuzzyQueryCoursesOfTeacherByName")
+    public HttpResponseWrapperUtil fuzzyQueryCoursesOfTeacherByName(@RequestParam("teacherId") long teacherId,
+                                                                    @RequestParam("courseName") String courseName) {
+        List<Course> courses = courseService.getCoursesOfTeacherByCourseName(teacherId, courseName);
+        if( courses == null || courses.size() == 0 ){
+            return new HttpResponseWrapperUtil(null, -1, "无相关查询信息");
+        }
         return wrapCourseList2JSON(courses);
     }
 
@@ -173,11 +194,8 @@ public class CourseController {
         if( teacherId != course.getTeacherId() ){
             return new HttpResponseWrapperUtil(null, -1, "教师权限不足");
         }
-        if( courseService.isStudentJoinCourse(studentId,courseId) != 1 ){
-            return new HttpResponseWrapperUtil(null, -1, "学生尚未加入课程");
-        }
         if( role != 0 && role != 1 ){
-            return new HttpResponseWrapperUtil(null, -1, "role值错误");
+            return new HttpResponseWrapperUtil(null, -1, "角色值错误");
         }
         courseService.updateCourseMemberRole(courseId, studentId, role);
         return new HttpResponseWrapperUtil(null);

@@ -174,9 +174,9 @@ public class AccountController {
     @ApiOperation("用户修改密码接口")
     @PostMapping(value = "/resetUserPassword/{tag}")
     public HttpResponseWrapperUtil resetUserPassword(@PathVariable("tag") int tag,
-                                                     @RequestParam(value = "userId") long userId,
-                                                     @RequestParam(value = "oldPassword") String oldPassword,
-                                                     @RequestParam(value = "newPassword") String newPassword){
+                                                     @RequestParam("userId") long userId,
+                                                     @RequestParam("oldPassword") String oldPassword,
+                                                     @RequestParam("newPassword") String newPassword){
         User user = null;
         if( tag == 0 ){
             user = studentService.getStudentById(userId);

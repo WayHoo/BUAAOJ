@@ -16,6 +16,17 @@
         SELECT * FROM courses ORDER BY course_id ASC;
     </select>
 
+    <select id="getCoursesByCourseName" parameterType="String"
+            resultMap="CourseResultMap" useCache="true">
+        SELECT * FROM courses WHERE course_name LIKE CONCAT(#{courseName}, '%');
+    </select>
+
+    <select id="getCoursesOfTeacherByCourseName" parameterType="Map"
+            resultMap="CourseResultMap" useCache="true">
+        SELECT * FROM courses WHERE teacher_id = #{teacherId} AND
+        course_name LIKE CONCAT(#{courseName}, '%');
+    </select>
+
     <select id="getAllCoursesByTeacherId" parameterType="long" resultMap="CourseResultMap" useCache="true">
         SELECT * FROM courses WHERE teacher_id = #{teacherId}
         ORDER BY course_id ASC;

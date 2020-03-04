@@ -1,6 +1,7 @@
 package cn.edu.buaa.onlinejudge.mapper;
 
 import cn.edu.buaa.onlinejudge.model.Course;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -14,11 +15,27 @@ public interface CourseMapper {
     List<Course> getAllCourses();
 
     /**
+     * 根据课程名称模糊查询课程
+     * @param courseName - 课程名称
+     * @return Course对象列表
+     */
+    List<Course> getCoursesByCourseName(String courseName);
+
+    /**
      * 获取教师的所有开课课程
      * @param teacherId - 教师ID
      * @return Course对象列表
      */
     List<Course> getAllCoursesByTeacherId(long teacherId);
+
+    /**
+     * 根据课程名称模糊查询教师的所有课程
+     * @param teacherId - 教师ID
+     * @param courseName - 课程名称
+     * @return - Course对象列表
+     */
+    List<Course> getCoursesOfTeacherByCourseName(@Param("teacherId") long teacherId,
+                                                 @Param("courseName") String courseName);
 
     /**
      * 根据课程ID获取课程对象

@@ -7,9 +7,11 @@ import cn.edu.buaa.onlinejudge.model.Problem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 @Service
 public class ProblemService {
@@ -18,6 +20,12 @@ public class ProblemService {
 
     @Autowired
     private InputOutputSampleMapper inputOutputSampleMapper;
+
+    @Autowired
+    private CourseService courseService;
+
+    @Autowired
+    private ContestService contestService;
 
     /**
      * 根据题目ID查询题目
@@ -35,20 +43,34 @@ public class ProblemService {
         return problem;
     }
 
-    /**
-     * 获取多个竞赛下的所有可见题目，查询的题目中不包含输入输出样例
-     * @param contestIdList - 竞赛ID列表
-     * @return Problem对象列表
-     */
-    public List<Problem> getVisibleProblemsByContestIdList(List<Integer> contestIdList) {
+    public List<Problem> getVisibleProblemsByContestIdList(List<Integer> contestIdList){
         return problemMapper.getVisibleProblemsByContestIdList(contestIdList);
-
     }
 
-    public Map<String,Object> getPageVisibleProblemsByContestIdList(List<Integer> contestIdList,
-                                                                    int pageSize, int pageIndex) {
+    /**
+     * 根据题目ID查询题目，不查询题目的输入输出样例
+     * @param problemId - 题目ID
+     * @return
+     */
+    public Problem getBasicProblemById(long problemId){
+        return problemMapper.getProblemById(problemId);
+    }
+
+    /**
+     * 获取学生个人题库，查询的题目中不包含输入输出样例
+     * 题库仅展示该学生已加入课程中的所有题目
+     * @param studentId - 学生ID
+     * @return 题目对象列表
+     */
+    public List<Problem> getPersonalProblemLibrary(long studentId){
+        List<Integer> courseIdList = courseService.getStudentJoinedCourseIdList(studentId);
+        List<Integer> contestIdList = contestService.getVisibleContestIdListByCourseIdList(courseIdList);
+        return problemMapper.getVisibleProblemsByContestIdList(contestIdList);
+    }
+
+    public Map<String,Object> getPageProblemsFromPersonalLibrary(long studentId, int pageSize, int pageIndex) {
         Map<String,Object> map = new HashMap<>();
-        List<Problem> problemList = getVisibleProblemsByContestIdList(contestIdList);
+        List<Problem> problemList = getPersonalProblemLibrary(studentId);
         map.put("totalProblemNum",problemList.size());
         if( pageSize * pageIndex >= problemList.size() ){
             map.put("problemList",null);
@@ -58,6 +80,50 @@ public class ProblemService {
             map.put("problemList",problemList.subList(pageSize * pageIndex, toIndex));
         }
         return map;
+    }
+
+    /**
+     * 在个人题库（已加入课程中的所有题目）中根据题目名称模糊查询
+     * @param studentId - 学生ID
+     * @param problemName - 题目名称
+     * @return
+     */
+    public List<Problem> fuzzySearchProblemsByNameFromPersonalLibrary(long studentId, String problemName){
+        //校验前端所传数据是否无效
+        if( problemName == null || problemName.length() == 0 ){
+            return null;
+        }
+        List<Problem> problemList = getPersonalProblemLibrary(studentId);
+        if( problemList == null || problemList.size() == 0 ){
+            return null;
+        }
+        List<Problem> data = new ArrayList<>();
+        for (Problem problem : problemList) {
+            if( problem.getProblemName().length() >= problemName.length() &&
+                problem.getProblemName().substring(0, problemName.length()).equals(problemName) ){
+                data.add(problem);
+            }
+        }
+        return data;
+    }
+
+    public List<Problem> fuzzySearchProblemsByAuthorFromPersonalLibrary(long studentId, String author){
+        //校验前端所传数据是否无效
+        if( author == null || author.length() == 0 ){
+            return null;
+        }
+        List<Problem> problemList = getPersonalProblemLibrary(studentId);
+        if( problemList == null || problemList.size() == 0 ){
+            return null;
+        }
+        List<Problem> data = new ArrayList<>();
+        for (Problem problem : problemList) {
+            if( problem.getAuthor().length() >= author.length() &&
+                    problem.getAuthor().substring(0, author.length()).equals(author) ){
+                data.add(problem);
+            }
+        }
+        return data;
     }
 
     public List<Problem> getVisibleProblemsOfContest(int contestId){
@@ -101,5 +167,14 @@ public class ProblemService {
      */
     public void deleteProblem(long problemId){
         problemMapper.deleteProblem(problemId);
+    }
+
+    /**
+     * 反转题目的可见性
+     * @param problemId - 题目ID
+     */
+    public void reverseProblemVisibility(long problemId){
+        int visibility = problemMapper.getProblemById(problemId).isVisible() ? 1 : 0;
+        problemMapper.setProblemVisibility(problemId, 1 - visibility);
     }
 }

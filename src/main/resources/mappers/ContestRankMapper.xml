@@ -9,13 +9,48 @@
         <result property="contestId" column="contest_id"></result>
         <result property="studentId" column="student_id"></result>
         <result property="studentName" column="student_name"></result>
+        <result property="studentNumber" column="student_number"></result>
         <result property="score" column="score"></result>
         <result property="wrongSubmitTimes" column="wrong_submit_times"></result>
+        <result property="rankNum" column="rank_num"></result>
     </resultMap>
 
     <select id="getContestPageRanks" parameterType="Map"
             resultMap="ContestRankResultMap" useCache="true">
-        SELECT * FROM view_contest_ranks WHERE contest_id = #{contestId}
-        ORDER BY score DESC, wrong_submit_times ASC LIMIT #{pageSize} OFFSET ${pageIndex * pageSize};
+        SELECT a.*, @row_num := @row_num + 1 AS row_num,
+        CASE
+        WHEN (a.score = @pre_score) AND (a.wrong_submit_times = @pre_penalty) THEN @rank
+        WHEN (@pre_score := a.score) AND (@pre_wrong_submit_times := a.wrong_submit_times) THEN @rank := @row_num
+        WHEN (@pre_wrong_submit_times := a.wrong_submit_times) AND (@pre_score := a.score) THEN @rank := @row_num
+        WHEN (@pre_score = 0) OR (@pre_wrong_submit_times = 0) THEN @rank := @row_num
+        END AS rank_num
+        FROM (SELECT * FROM view_contest_ranks WHERE contest_id = #{contestId}
+        ORDER BY score DESC, wrong_submit_times ASC, student_name ASC LIMIT #{pageSize} OFFSET ${pageIndex * pageSize}) AS a,
+        (SELECT @row_num := 0, @rank := 0, @pre_score := NULL, @pre_wrong_submit_times := NULL) AS t;
     </select>
+
+    <select id="getContestRankByStudentName" parameterType="Map"
+            resultMap="ContestRankResultMap" useCache="true">
+        SELECT b.* FROM
+        (
+            SELECT a.*, @row_num := @row_num + 1 AS row_num,
+            CASE
+            WHEN (a.score = @pre_score) AND (a.wrong_submit_times = @pre_penalty) THEN @rank
+            WHEN (@pre_score := a.score) AND (@pre_wrong_submit_times := a.wrong_submit_times) THEN @rank := @row_num
+            WHEN (@pre_wrong_submit_times := a.wrong_submit_times) AND (@pre_score := a.score) THEN @rank := @row_num
+            WHEN (@pre_score = 0) OR (@pre_wrong_submit_times = 0) THEN @rank := @row_num
+            END AS rank_num
+            FROM (SELECT * FROM view_contest_ranks WHERE contest_id = #{contestId}
+            ORDER BY score DESC, wrong_submit_times ASC, student_name ASC) AS a,
+            (SELECT @row_num := 0, @rank := 0, @pre_score := NULL, @pre_wrong_submit_times := NULL) AS t
+        ) AS b WHERE b.student_name LIKE CONCAT(#{studentName}, '%');
+    </select>
+
+    <select id="getContestLimitRanks" parameterType="Map"
+            resultMap="ContestRankResultMap" useCache="true">
+        SELECT * FROM view_contest_ranks WHERE contest_id = #{contestId}
+        ORDER BY score DESC, wrong_submit_times ASC, student_name ASC LIMIT #{limit};
+    </select>
+
+
 </mapper>
