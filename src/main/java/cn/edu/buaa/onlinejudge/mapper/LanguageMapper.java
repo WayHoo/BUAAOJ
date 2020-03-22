@@ -14,9 +14,4 @@ public interface LanguageMapper {
      */
     Language getLanguageById(int languageId);
 
-    /**
-     * 获取所有编程语言对象
-     * @return Language对象列表
-     */
-    List<Language> getAllLanguages();
 }

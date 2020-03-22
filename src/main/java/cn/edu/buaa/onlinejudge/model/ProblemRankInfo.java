@@ -2,6 +2,10 @@ package cn.edu.buaa.onlinejudge.model;
 
 import java.sql.Timestamp;
 
+/**
+ * 对应`problem_rank_info`数据表
+ * 用于存储学生在竞赛进行期间的提交统计数据，便于排名和统计
+ */
 public class ProblemRankInfo {
     /**
      * 学生ID

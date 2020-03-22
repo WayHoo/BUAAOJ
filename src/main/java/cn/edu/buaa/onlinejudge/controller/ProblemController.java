@@ -8,7 +8,6 @@ import cn.edu.buaa.onlinejudge.service.SubmissionService;
 import cn.edu.buaa.onlinejudge.utils.HttpResponseWrapperUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -21,17 +20,20 @@ import java.util.Map;
 @RequestMapping(value = "BUAAOJ/problems")
 public class ProblemController {
 
-    @Autowired
-    private ProblemService problemService;
+    private final ProblemService problemService;
 
-    @Autowired
-    private ContestService contestService;
+    private final ContestService contestService;
 
-    @Autowired
-    private SubmissionService submissionService;
+    private final SubmissionService submissionService;
 
-    @Autowired
-    private CourseService courseService;
+    private final CourseService courseService;
+
+    public ProblemController(ProblemService problemService, ContestService contestService, SubmissionService submissionService, CourseService courseService) {
+        this.problemService = problemService;
+        this.contestService = contestService;
+        this.submissionService = submissionService;
+        this.courseService = courseService;
+    }
 
     @ApiOperation("学生根据题目ID查看题目接口")
     @GetMapping(value = "/getProblemById/{studentId}/{problemId}")
@@ -40,23 +42,33 @@ public class ProblemController {
         Problem problem = problemService.getProblemById(problemId);
         Contest contest = contestService.getContestById(problem.getContestId());
         if( problem == null || contest == null ){
-            return new HttpResponseWrapperUtil(null, -1, "failure");
+            return new HttpResponseWrapperUtil(null, -1, "查询失败");
         }
-        Submission submission = submissionService.getStudentLatestSubmissionOfProblem(studentId,problemId);
+        Submission submission = submissionService.getStudentLatestSubmissionOfProblem(studentId, problemId);
         Map<String,Object> data = wrapProblem2Json(problem);
-        data.put("isAnswerable",contest.isAnswerable() ? 1 : 0);
+        //竞赛在当前进行状态是否可答题
+        boolean isAnswerable = contestService.isContestAnswerable(contest);
+        data.put("isAnswerable", isAnswerable ? 1 : 0);
         String submitCode = (submission == null) ? null : submission.getSubmitCode();
         data.put("submitCode",submitCode);
         return new HttpResponseWrapperUtil(data);
     }
 
+    /**
+     * 不同学生查看到的题库不一定相同
+     * 题库仅展示该学生已加入课程中的所有题目
+     * @param pageSize - 页面大小
+     * @param pageIndex - 页面索引
+     * @param studentId - 学生ID
+     * @return
+     */
     @ApiOperation("学生查看题库接口")
     @GetMapping(value = "/getPageProblems/{pageSize}/{pageIndex}/{studentId}")
     public HttpResponseWrapperUtil getPageProblems(@PathVariable("pageSize") int pageSize,
                                                    @PathVariable("pageIndex") int pageIndex,
                                                    @PathVariable("studentId") long studentId) {
         if( pageSize < 0 || pageIndex < 0 ) {
-            return new HttpResponseWrapperUtil(null, -1, "分页参数错误");
+            return new HttpResponseWrapperUtil(null, -1, "页面参数错误");
         }
         Map<String,Object> problemMap = problemService.getPageProblemsFromPersonalLibrary(studentId,pageSize,pageIndex);
         List<Problem> problemList = (List<Problem>)problemMap.get("problemList");
@@ -90,7 +102,7 @@ public class ProblemController {
         Contest contest = contestService.getContestById(problem.getContestId());
         Course course = courseService.getCourseById(contest.getCourseId());
         //题库中不会展示学生尚未加入课程中的题目
-        if( courseService.isStudentJoinCourse(studentId, course.getCourseId()) != 1 ){
+        if( courseService.studentJoinCourseStatus(studentId, course.getCourseId()) != 1 ){
             return new HttpResponseWrapperUtil(null, -1, "题目不存在");
         }
         Map<String,Object> data = wrapProblemSubmitInfo2Json(problem);
@@ -187,7 +199,7 @@ public class ProblemController {
     public HttpResponseWrapperUtil getProblemsOfContest(@PathVariable("contestId") int contestId) {
         Contest contest = contestService.getContestById(contestId);
         if( contest == null ){
-            return new HttpResponseWrapperUtil(null, -1, "竞赛不存在");
+            return new HttpResponseWrapperUtil(null, -1, "访问对象不存在");
         }
         List<Problem> problemList = problemService.getAllProblemsOfContest(contestId);
         List<Object> data = new ArrayList<>();
@@ -210,7 +222,7 @@ public class ProblemController {
     public HttpResponseWrapperUtil createProblem(@RequestBody Problem problem) {
         Contest contest = contestService.getContestById(problem.getContestId());
         if( contest == null ){
-            return new HttpResponseWrapperUtil(null, -1, "竞赛不存在");
+            return new HttpResponseWrapperUtil(null, -1, "操作失败");
         }
         problemService.insertProblem(problem);
         Map<String,Object> data = new HashMap<>();
@@ -229,6 +241,12 @@ public class ProblemController {
         return new HttpResponseWrapperUtil(data);
     }
 
+    /**
+     * 教师删除题目，同时会删除题目测试点文件
+     * @param contestId - 竞赛ID
+     * @param problemId - 题目ID
+     * @return
+     */
     @ApiOperation("教师删除题目接口")
     @GetMapping(value = "/deleteProblem/{contestId}/{problemId}")
     public HttpResponseWrapperUtil deleteProblem(@PathVariable("contestId") int contestId,

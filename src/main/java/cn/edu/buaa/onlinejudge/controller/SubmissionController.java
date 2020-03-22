@@ -1,7 +1,7 @@
 package cn.edu.buaa.onlinejudge.controller;
 
 import cn.edu.buaa.onlinejudge.model.*;
-import cn.edu.buaa.onlinejudge.service.ContestService;
+import cn.edu.buaa.onlinejudge.service.JMSProducerService;
 import cn.edu.buaa.onlinejudge.service.LanguageService;
 import cn.edu.buaa.onlinejudge.service.ProblemService;
 import cn.edu.buaa.onlinejudge.service.SubmissionService;
@@ -9,7 +9,6 @@ import cn.edu.buaa.onlinejudge.utils.DateUtil;
 import cn.edu.buaa.onlinejudge.utils.HttpResponseWrapperUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.UnsupportedEncodingException;
@@ -23,17 +22,21 @@ import java.util.Map;
 @RequestMapping(value = "BUAAOJ/submissions")
 public class SubmissionController {
 
-    @Autowired
-    private SubmissionService submissionService;
+    private final SubmissionService submissionService;
 
-    @Autowired
-    private ProblemService problemService;
+    private final ProblemService problemService;
 
-    @Autowired
-    private ContestService contestService;
+    private final LanguageService languageService;
 
-    @Autowired
-    private LanguageService languageService;
+    private final JMSProducerService jmsProducerService;
+
+    public SubmissionController(SubmissionService submissionService, ProblemService problemService,
+                                LanguageService languageService, JMSProducerService jmsProducerService) {
+        this.submissionService = submissionService;
+        this.problemService = problemService;
+        this.languageService = languageService;
+        this.jmsProducerService = jmsProducerService;
+    }
 
     @ApiOperation("学生查看对指定题目的提交记录接口")
     @GetMapping(value = "/getProblemSubmissionsOfStudent/{studentId}/{problemId}")
@@ -68,6 +71,7 @@ public class SubmissionController {
                 metadata.put("problemNumber",problem.getProblemNumber());
                 Language language = languageService.getLanguageById(submission.getLanguageId());
                 metadata.put("language",language.getLanguageName());
+                //代码长度，以K为单位，保留到小数点后一位
                 Float codeLength = 0.0f;
                 try {
                     codeLength = submission.getSubmitCode().getBytes("utf-8").length / 1024.0f;
@@ -88,42 +92,19 @@ public class SubmissionController {
     @PostMapping(value = "/submitCode")
     public HttpResponseWrapperUtil submitCode(@RequestBody Submission submission) {
         submission.setSubmitTime(DateUtil.getCurrentTimestamp());
-        Problem problem = problemService.getProblemById(submission.getProblemId());
+        Problem problem = problemService.getBasicProblemById(submission.getProblemId());
         if( problem == null ){
             return new HttpResponseWrapperUtil(null, -1, "题目不存在");
         }
         submission.setContestId(problem.getContestId());
         submissionService.insertSubmission(submission);
         if( submission.getSubmissionId() > 0 ){
-            //提交ID进入队列
-            //判题
-            //插入problem_rank_info数据表
-            /**
-            ProblemRankInfo problemRankInfo = submissionService.getProblemRankInfo(submission.getStudentId(), submission.getProblemId());
-            if( problemRankInfo == null ){
-                int wrongSubmitTimes = 0;
-                if( !"AC".equals(submission.getJudgeResult()) ){
-                    wrongSubmitTimes = 1;
-                }
-                problemRankInfo = new ProblemRankInfo(submission.getStudentId(),
-                        submission.getContestId(),submission.getProblemId(),
-                        submission.getJudgeScore(),submission.getJudgeResult(),
-                        wrongSubmitTimes, submission.getSubmitTime());
-                submissionService.insertProblemRankInfo(problemRankInfo);
-            }else{
-                problemRankInfo.setJudgeResult(submission.getJudgeResult());
-                problemRankInfo.setScore(submission.getJudgeScore());
-                problemRankInfo.setSubmitTime(submission.getSubmitTime());
-                if( !"AC".equals(submission.getJudgeResult()) ){
-                    problemRankInfo.setWrongSubmitTimes(problemRankInfo.getWrongSubmitTimes() + 1);
-                }
-                submissionService.updateProblemRankInfo(problemRankInfo);
-            }
-             **/
+            //提交ID进入ActiveMQ队列
+            jmsProducerService.sendMessage(submission.getSubmissionId());
             Map<String,Object> data = wrapSubmission2Json(submission);
             return new HttpResponseWrapperUtil(data);
-        }else{
-            return new HttpResponseWrapperUtil(null, -1, "failure");
+        } else{
+            return new HttpResponseWrapperUtil(null, -1, "提交代码失败");
         }
     }
 

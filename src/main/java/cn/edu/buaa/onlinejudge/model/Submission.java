@@ -174,4 +174,23 @@ public class Submission {
     public void setCompileOutput(String compileOutput) {
         this.compileOutput = compileOutput;
     }
+
+    @Override
+    public String toString() {
+        return "Submission{" +
+                "submissionId=" + submissionId +
+                ", studentId=" + studentId +
+                ", problemId=" + problemId +
+                ", contestId=" + contestId +
+                ", languageId=" + languageId +
+                ", submitTime=" + submitTime +
+                ", executeTime=" + executeTime +
+                ", usedTime=" + usedTime +
+                ", usedMemory=" + usedMemory +
+                ", judgeScore=" + judgeScore +
+                ", judgeResult='" + judgeResult + '\'' +
+                ", submitCode='" + submitCode + '\'' +
+                ", compileOutput='" + compileOutput + '\'' +
+                '}';
+    }
 }

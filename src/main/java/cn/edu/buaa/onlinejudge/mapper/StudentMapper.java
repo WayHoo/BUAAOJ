@@ -3,8 +3,6 @@ package cn.edu.buaa.onlinejudge.mapper;
 import cn.edu.buaa.onlinejudge.model.Student;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-
 @Repository
 public interface StudentMapper {
     /**

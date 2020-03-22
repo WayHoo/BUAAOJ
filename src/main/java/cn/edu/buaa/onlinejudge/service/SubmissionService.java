@@ -1,14 +1,15 @@
 package cn.edu.buaa.onlinejudge.service;
 
-import cn.edu.buaa.onlinejudge.mapper.ProblemMapper;
 import cn.edu.buaa.onlinejudge.mapper.ProblemRankInfoMapper;
 import cn.edu.buaa.onlinejudge.mapper.SubmissionMapper;
+import cn.edu.buaa.onlinejudge.model.Contest;
 import cn.edu.buaa.onlinejudge.model.ProblemRankInfo;
 import cn.edu.buaa.onlinejudge.model.Submission;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 @Service
@@ -17,10 +18,10 @@ public class SubmissionService {
     private SubmissionMapper submissionMapper;
 
     @Autowired
-    private ProblemMapper problemMapper;
+    private ProblemRankInfoMapper problemRankInfoMapper;
 
     @Autowired
-    private ProblemRankInfoMapper problemRankInfoMapper;
+    private ContestService contestService;
 
     public long getProblemSubmitStudents(long problemId) {
         return problemRankInfoMapper.getProblemSubmitStudents(problemId);
@@ -52,8 +53,59 @@ public class SubmissionService {
         return submissionMapper.getSubmissionsByStudentIdAndContestId(studentId, contestId);
     }
 
+    /**
+     * 将学生的提交记录插入数据表
+     * 初次插入submissions数据表示尚未经过评测机评测，默认judgeResult为"PD"
+     * 因此无需插入`problem_rank_info`数据表
+     * @param submission - 提交记录对象
+     */
     public void insertSubmission(Submission submission){
         submissionMapper.insertSubmission(submission);
+    }
+
+    /**
+     * 更新学生的提交记录，主要用于回写经过代码评测后的提交记录
+     * 如果该提交是在竞赛进行期间完成的，会将提交记录稍作处理插入`problem_rank_info`数据表
+     * @param submission - 提交记录对象（主要存储评测结果信息，其余字段为空）
+     */
+    public void updateSubmission(Submission submission){
+        submissionMapper.updateSubmission(submission);
+        Submission realSubmission = submissionMapper.getSubmissionById(submission.getSubmissionId());
+        insertOrUpdateProblemRankInfo(realSubmission);
+    }
+
+    /**
+     * 将在竞赛时间范围内提交的记录稍作处理插入或更新problem_rank_info数据表，便于排名
+     * @param submission - 提交记录对象
+     */
+    public void insertOrUpdateProblemRankInfo(Submission submission){
+        Contest contest = contestService.getContestById(submission.getContestId());
+        if( contest == null ){
+            return;
+        }
+        Timestamp startTime = contest.getStartTime();
+        Timestamp finishTime = contest.getFinishTime();
+        if( submission.getSubmissionId() > 0 &&
+                submission.getSubmitTime().after(startTime) &&
+                submission.getSubmitTime().before(finishTime) ) {
+            ProblemRankInfo problemRankInfo = problemRankInfoMapper.getProblemRankInfoByStudentIdAndProblemId(submission.getStudentId(), submission.getProblemId());
+            if (problemRankInfo == null) {
+                int wrongSubmitTimes = "AC".equals(submission.getJudgeResult()) ? 0 : 1;
+                problemRankInfo = new ProblemRankInfo(submission.getStudentId(),
+                        submission.getContestId(), submission.getProblemId(),
+                        submission.getJudgeScore(), submission.getJudgeResult(),
+                        wrongSubmitTimes, submission.getSubmitTime());
+                problemRankInfoMapper.insertProblemRankInfo(problemRankInfo);
+            } else {
+                problemRankInfo.setJudgeResult(submission.getJudgeResult());
+                problemRankInfo.setScore(submission.getJudgeScore());
+                problemRankInfo.setSubmitTime(submission.getSubmitTime());
+                if (!"AC".equals(submission.getJudgeResult())) {
+                    problemRankInfo.setWrongSubmitTimes(problemRankInfo.getWrongSubmitTimes() + 1);
+                }
+                problemRankInfoMapper.updateProblemRankInfo(problemRankInfo);
+            }
+        }
     }
 
     /**
@@ -82,13 +134,5 @@ public class SubmissionService {
 
     public ProblemRankInfo getProblemRankInfo(long studentId, long problemId){
         return problemRankInfoMapper.getProblemRankInfoByStudentIdAndProblemId(studentId, problemId);
-    }
-
-    public void insertProblemRankInfo(ProblemRankInfo problemRankInfo){
-        problemRankInfoMapper.insertProblemRankInfo(problemRankInfo);
-    }
-
-    public void updateProblemRankInfo(ProblemRankInfo problemRankInfo){
-        problemRankInfoMapper.updateProblemRankInfo(problemRankInfo);
     }
 }

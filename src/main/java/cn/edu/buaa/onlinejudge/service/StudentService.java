@@ -2,13 +2,16 @@ package cn.edu.buaa.onlinejudge.service;
 
 import cn.edu.buaa.onlinejudge.model.Student;
 import cn.edu.buaa.onlinejudge.mapper.StudentMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class StudentService {
-    @Autowired
-    private StudentMapper studentMapper;
+
+    private final StudentMapper studentMapper;
+
+    public StudentService(StudentMapper studentMapper) {
+        this.studentMapper = studentMapper;
+    }
 
     public Student getStudentById(long studentId){
         return studentMapper.getStudentById(studentId);

@@ -1,6 +1,7 @@
 package cn.edu.buaa.onlinejudge.utils;
 
 import java.sql.Timestamp;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -41,5 +42,29 @@ public class DateUtil {
      */
     public static String formatTimestamp(Timestamp timestamp){
         return timestamp == null ? null : timestamp.toString().substring(0,timestamp.toString().indexOf("."));
+    }
+
+    /**
+     * 将默认时间格式的字符串时间转换为Timestamp类型
+     * @param strDate - 字符串时间
+     * @return Timestamp时间
+     */
+    public static Timestamp strToTimestamp(String strDate){
+        SimpleDateFormat sdf = new SimpleDateFormat(FORMATTER_SECOND);
+        Date date = null;
+        try {
+            date = sdf.parse(strDate);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return new Timestamp(date.getTime());
+    }
+
+    /**
+     * 将当前系统时间转化为yyyyMMddHHmmssSSS格式字符串，用户上传文件的临时文件名
+     * @return
+     */
+    public static String getNowTimeForUpload(){
+        return getCurrentTime("yyyyMMddHHmmssSSS");
     }
 }

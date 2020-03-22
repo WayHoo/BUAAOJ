@@ -4,15 +4,15 @@ import cn.edu.buaa.onlinejudge.model.Course;
 import cn.edu.buaa.onlinejudge.model.Problem;
 import cn.edu.buaa.onlinejudge.service.CourseService;
 import cn.edu.buaa.onlinejudge.service.ProblemService;
-import cn.edu.buaa.onlinejudge.service.TeacherService;
+import cn.edu.buaa.onlinejudge.utils.DateUtil;
 import cn.edu.buaa.onlinejudge.utils.FileUtil;
 import cn.edu.buaa.onlinejudge.utils.HttpResponseWrapperUtil;
 import cn.edu.buaa.onlinejudge.utils.ZipUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
@@ -28,22 +28,22 @@ import java.util.List;
 @RequestMapping(value = "BUAAOJ/files")
 public class FileController {
 
-    @Autowired
-    private TeacherService teacherService;
+    private final CourseService courseService;
 
-    @Autowired
-    private CourseService courseService;
-
-    @Autowired
-    private ProblemService problemService;
+    private final ProblemService problemService;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FileController.class);
 
+    public FileController(CourseService courseService, ProblemService problemService) {
+        this.courseService = courseService;
+        this.problemService = problemService;
+    }
+
     @ApiOperation("上传题目测试用例接口")
     @PostMapping(value = "/uploadProblemCheckpoints/{contestId}/{problemId}")
-    public HttpResponseWrapperUtil singleUpload(@PathVariable("contestId") int contestId,
-                                                @PathVariable("problemId") long problemId,
-                                                @RequestParam("checkpoint") MultipartFile checkpoint){
+    public HttpResponseWrapperUtil uploadProblemCheckpoints(@PathVariable("contestId") int contestId,
+                                                            @PathVariable("problemId") long problemId,
+                                                            @RequestParam("checkpoint") MultipartFile checkpoint){
         Problem problem = problemService.getProblemById(problemId);
         if( problem == null ){
             return new HttpResponseWrapperUtil(null, -1, "题目不存在");
@@ -54,22 +54,30 @@ public class FileController {
         if( checkpoint.isEmpty() ){
             return new HttpResponseWrapperUtil(null, -1, "上传失败，请选择文件");
         }
-        return null;
-//        //获取文件名
-//        String fileName = file.getOriginalFilename();
-//        //设置文件存储路径（Windows环境）
-//        String filePath = FileUtil.getUploadPath(Integer.toString(courseId));
-//        File dest = FileUtil.getFileDest(filePath,fileName);
-//        try {
-//            file.transferTo(dest);
-//            LOGGER.info("上传成功");
-//            toZip(filePath);
-//            return new HttpResponseWrapperUtil(null,200,"上传成功");
-//        } catch (IOException e) {
-//            LOGGER.info("上传失败");
-//            e.printStackTrace();
-//        }
-//        return new HttpResponseWrapperUtil(null, -1, "上传失败");
+        //获取原始文件名
+        String fileRealName = checkpoint.getOriginalFilename();
+        //获取点号的位置
+        int pointIndex = fileRealName.lastIndexOf(".");
+        //获取文件后缀
+        String fileSuffix = fileRealName.substring(pointIndex);
+        //新文件名,时间戳形式yyyyMMddHHmmssSSS
+        String fileNewName = DateUtil.getNowTimeForUpload();
+        //新文件完整名（含后缀）
+        String saveFileName = fileNewName.concat(fileSuffix);
+        //获取系统临时文件夹路径
+        String tmpFilePath = FileUtil.getTmpDirPath();
+        File savedFile = new File(tmpFilePath, saveFileName);
+        try {
+            FileUtils.copyInputStreamToFile(checkpoint.getInputStream(), savedFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return new HttpResponseWrapperUtil(null, -1, "上传失败");
+        }
+        //将测试点压缩包解压到指定路径
+        ZipUtil.unZip(savedFile, FileUtil.getCheckpointUploadPath(Long.toString(problemId)));
+        //删除系统的临时测试点压缩包
+        savedFile.delete();
+        return new HttpResponseWrapperUtil(null);
     }
 
     /**
@@ -86,18 +94,18 @@ public class FileController {
                                                     HttpServletRequest request){
         Course course = courseService.getCourseById(courseId);
         if( course == null ){
-            return new HttpResponseWrapperUtil(null, -1, "课程不存在");
+            return new HttpResponseWrapperUtil(null, -1, "该课程不存在");
         }
         if( course.getTeacherId() != teacherId ){
-            return new HttpResponseWrapperUtil(null, -1, "上传权限不足");
+            return new HttpResponseWrapperUtil(null, -1, "教师权限不足");
         }
         List<MultipartFile> files = ((MultipartHttpServletRequest)request).getFiles("file");
         if( files == null ){
             return new HttpResponseWrapperUtil(null, -1, "上传失败，请选择文件");
         }
-        //设置文件存储路径（Windows环境）
-        String filePath = FileUtil.getUploadPath(Integer.toString(courseId));
-        int i = 0;
+        //获取文件存储路径
+        String filePath = FileUtil.getCoursewareUploadPath(Integer.toString(courseId));
+        int i;
         for (i = 0; i < files.size(); i++) {
             MultipartFile file = files.get(i);
             if( file.isEmpty() ) break;
@@ -120,7 +128,7 @@ public class FileController {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return new HttpResponseWrapperUtil(null,200,"上传成功");
+        return new HttpResponseWrapperUtil(null);
     }
 
     @ApiOperation("打包下载课程所有课件接口")
@@ -128,10 +136,10 @@ public class FileController {
     public void downloadCourseware(@PathVariable("studentId") long studentId,
                                    @PathVariable("courseId") int courseId,
                              HttpServletResponse response) throws UnsupportedEncodingException {
-        if( courseService.isStudentJoinCourse(studentId, courseId) != 1 ){
+        if( courseService.studentJoinCourseStatus(studentId, courseId) != 1 ){
             return;
         }
-        String filePath = FileUtil.getUploadPath(Integer.toString(courseId));
+        String filePath = FileUtil.getCoursewareUploadPath(Integer.toString(courseId));
         LOGGER.info("待下载的文件目录为：" + filePath);
         //设置文件路径
         File zipFile = new File(filePath + "courseware.zip");
@@ -193,6 +201,6 @@ public class FileController {
         }
         FileOutputStream fos = new FileOutputStream(tmpFile);
         ZipUtil.toZip(filePath,fos,true);
-        FileUtil.removeFile(tmpPath + zipName,filePath + zipName);
+        FileUtil.copyFile(tmpPath + zipName,filePath + zipName);
     }
 }

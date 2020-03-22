@@ -12,11 +12,6 @@
         <result property="sampleOutput" column="sample_output"></result>
     </resultMap>
 
-    <select id="getInputOutputSamplesOfProblem" parameterType="long"
-            resultMap="InputOutputSampleResultMap" useCache="true">
-        SELECT * FROM input_output_samples WHERE problem_id = #{problemId};
-    </select>
-
     <insert id="insertInputOutputSample" parameterType="InputOutputSample" flushCache="true">
         INSERT INTO input_output_samples (problem_id, sample_number, sample_input, sample_output)
         VALUES (#{problemId}, #{sampleNumber}, #{sampleInput}, #{sampleOutput});

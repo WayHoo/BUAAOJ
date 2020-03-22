@@ -5,18 +5,22 @@ public class CourseStudentRelationship {
      * 学生与课程关系（是否参加课程以及在课程中的角色）ID
      */
     private long relationshipId;
+
     /**
      * 课程ID
      */
     private int courseId;
+
     /**
      * 学生ID
      */
     private long studentId;
+
     /**
      * 学生提交的加入课程申请是否通过
      */
     private boolean isStudentAccept;
+
     /**
      * 学生在课程中的角色（如果学生通过申请），学生 -- 0，助教 -- 1
      * 默认为学生

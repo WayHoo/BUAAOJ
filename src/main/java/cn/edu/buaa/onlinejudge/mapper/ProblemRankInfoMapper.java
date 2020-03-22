@@ -1,6 +1,5 @@
 package cn.edu.buaa.onlinejudge.mapper;
 
-import cn.edu.buaa.onlinejudge.model.Problem;
 import cn.edu.buaa.onlinejudge.model.ProblemRankInfo;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;

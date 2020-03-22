@@ -4,28 +4,33 @@ import cn.edu.buaa.onlinejudge.mapper.InputOutputSampleMapper;
 import cn.edu.buaa.onlinejudge.mapper.ProblemMapper;
 import cn.edu.buaa.onlinejudge.model.InputOutputSample;
 import cn.edu.buaa.onlinejudge.model.Problem;
-import org.springframework.beans.factory.annotation.Autowired;
+import cn.edu.buaa.onlinejudge.utils.FileUtil;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 @Service
 public class ProblemService {
-    @Autowired
-    private ProblemMapper problemMapper;
 
-    @Autowired
-    private InputOutputSampleMapper inputOutputSampleMapper;
+    private final ProblemMapper problemMapper;
 
-    @Autowired
-    private CourseService courseService;
+    private final InputOutputSampleMapper inputOutputSampleMapper;
 
-    @Autowired
-    private ContestService contestService;
+    private final CourseService courseService;
+
+    private final ContestService contestService;
+
+    public ProblemService(ProblemMapper problemMapper,
+                          InputOutputSampleMapper inputOutputSampleMapper,
+                          CourseService courseService, ContestService contestService) {
+        this.problemMapper = problemMapper;
+        this.inputOutputSampleMapper = inputOutputSampleMapper;
+        this.courseService = courseService;
+        this.contestService = contestService;
+    }
 
     /**
      * 根据题目ID查询题目
@@ -167,6 +172,8 @@ public class ProblemService {
      */
     public void deleteProblem(long problemId){
         problemMapper.deleteProblem(problemId);
+        //删除题目测试点文件
+        deleteProblemCheckpointFile(problemId);
     }
 
     /**
@@ -176,5 +183,17 @@ public class ProblemService {
     public void reverseProblemVisibility(long problemId){
         int visibility = problemMapper.getProblemById(problemId).isVisible() ? 1 : 0;
         problemMapper.setProblemVisibility(problemId, 1 - visibility);
+    }
+
+    /**
+     * 删除指定题目的所有测试点文件
+     * @param problemId - 题目ID
+     * @return 删除成功与否的布尔值
+     */
+    public boolean deleteProblemCheckpointFile(long problemId){
+        String checkpointFileAbsolutePath =
+                FileUtil.getCheckpointUploadPath(Long.toString(problemId));
+        //删除题目测试点文件夹及文件夹下所有文件
+        return FileUtil.delete(checkpointFileAbsolutePath);
     }
 }

@@ -37,8 +37,8 @@
         <set>
             <if test="userName != null and userName.length() > 0">teacher_name = #{userName},</if>
             <if test="userNumber != null and userNumber.length() > 0">teacher_number = #{userNumber},</if>
-            <if test="departmentId > 0">department_id = #{departmentId},</if>
-            <if test="introduction != null">introduction = #{introduction},</if>
+            <if test="departmentId > 0 and 7 > departmentId">department_id = #{departmentId},</if>
+            introduction = #{introduction},
         </set>
         WHERE teacher_id = #{userId};
     </update>

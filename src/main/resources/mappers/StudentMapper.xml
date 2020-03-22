@@ -38,9 +38,9 @@
         <set>
             <if test="userName != null and userName.length() > 0">student_name = #{userName},</if>
             <if test="userNumber != null and userNumber.length() > 0">student_number = #{userNumber},</if>
-            <if test="departmentId > 0">department_id = #{departmentId},</if>
-            <if test="preferLanguageId > 0">prefer_language_id = #{preferLanguageId},</if>
-            <if test="introduction != null">introduction = #{introduction},</if>
+            <if test="departmentId > 0 and 7 > departmentId">department_id = #{departmentId},</if>
+            <if test="preferLanguageId > 0 and 5 > preferLanguageId">prefer_language_id = #{preferLanguageId},</if>
+            introduction = #{introduction},
         </set>
         WHERE student_id = #{userId};
     </update>

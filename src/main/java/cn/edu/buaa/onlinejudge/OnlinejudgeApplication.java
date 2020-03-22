@@ -11,7 +11,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @MapperScan("cn.edu.buaa.onlinejudge.mapper")
 @EnableCaching
 @EnableSwagger2 // 启用Swagger
-@ComponentScan(basePackages = {"cn.edu.buaa.onlinejudge.service","cn.edu.buaa.onlinejudge.mapper","cn.edu.buaa.onlinejudge.controller"})
+@ComponentScan(basePackages = {"cn.edu.buaa.onlinejudge.mapper", "cn.edu.buaa.onlinejudge.service", "cn.edu.buaa.onlinejudge.controller"})
 
 public class OnlinejudgeApplication {
 

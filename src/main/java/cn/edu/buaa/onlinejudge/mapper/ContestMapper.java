@@ -2,12 +2,10 @@ package cn.edu.buaa.onlinejudge.mapper;
 
 import cn.edu.buaa.onlinejudge.model.Contest;
 import cn.edu.buaa.onlinejudge.model.ContestRank;
-import io.swagger.models.auth.In;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Map;
 
 @Repository
 public interface ContestMapper {
@@ -31,6 +29,14 @@ public interface ContestMapper {
      * @return Contest对象列表
      */
     List<Contest> getAllContestsOfCourse(int courseId);
+
+    /**
+     * 获取课程中所有竞赛的ID（包括不可见的竞赛）
+     * @param courseId - 课程ID
+     * @return 竞赛ID列表
+     */
+    List<Integer> getAllContestIdOfCourse(int courseId);
+
     /**
      * 获取所有竞赛的个数
      * @return 竞赛个数
@@ -107,8 +113,8 @@ public interface ContestMapper {
 
     /**
      * 删除竞赛
-     * 由于由于竞赛数据表与题目数据表之间的外键约束关系设置了`ON DELETE CASCADE ON UPDATE CASCADE`，
-     * 因此删除竞赛会自动删除竞赛中所有的题目
+     * 由于竞赛数据表、题目数据表、题目输入输出样例数据表之间的外键约束关系设置了`ON DELETE CASCADE ON UPDATE CASCADE`，
+     * 因此删除竞赛会自动删除竞赛中所有的题目和题目的所有输入输出样例
      * @param contestId - 竞赛ID
      */
     void deleteContest(int contestId);

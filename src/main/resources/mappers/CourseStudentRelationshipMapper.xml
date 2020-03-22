@@ -39,7 +39,7 @@
         WHERE course_id = #{courseId} AND student_id = #{studentId};
     </update>
 
-    <update id="auditStudent" parameterType="Map" flushCache="true">
+    <update id="setStudentAcceptance" parameterType="Map" flushCache="true">
         UPDATE course_student_relationships SET is_student_accept = #{isStudentAccept}
         WHERE course_id = #{courseId} AND student_id = #{studentId};
     </update>

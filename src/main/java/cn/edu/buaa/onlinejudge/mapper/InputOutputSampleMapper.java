@@ -21,19 +21,6 @@ public interface InputOutputSampleMapper {
     void insertInputOutputSample(InputOutputSample inputOutputSample);
 
     /**
-     * 修改输入输出样例
-     * @param inputOutputSample - 输入输出样例对象
-     */
-    void updateInputOutputSample(InputOutputSample inputOutputSample);
-
-    /**
-     * 获取题目的输入输出样例组数
-     * @param problemId - 题目ID
-     * @return
-     */
-    int getInputOutputSampleNumOfProblem(long problemId);
-
-    /**
      * 删除题目的所有输入输出样例
      * @param problemId - 题目ID
      */

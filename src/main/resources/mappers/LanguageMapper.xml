@@ -16,8 +16,4 @@
         SELECT * FROM languages WHERE language_id = #{languageId};
     </select>
 
-    <select id="getAllLanguages" resultMap="LanguageResultMap" useCache="true">
-        SELECT * FROM languages;
-    </select>
-
 </mapper>

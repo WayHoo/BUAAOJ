@@ -27,6 +27,10 @@
     <select id="getAllContestsOfCourse" parameterType="int" resultMap="ContestResultMap" useCache="true">
         SELECT * FROM contests WHERE course_id = #{courseId} ORDER BY contest_id ASC;
     </select>
+
+    <select id="getAllContestIdOfCourse" parameterType="int" resultType="int" useCache="true">
+        SELECT contest_id FROM contests WHERE course_id = #{courseId};
+    </select>
     
     <select id="getTotalContestsNum" resultType="int" useCache="true">
         SELECT COUNT(*) FROM contests;

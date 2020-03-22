@@ -5,11 +5,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.nio.charset.Charset;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
+import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
 public class ZipUtil {
+
     private static final int BUFFER_SIZE = 2 * 1024;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FileController.class);
@@ -129,6 +134,93 @@ public class ZipUtil {
                     }
                 }
             }
+        }
+    }
+
+    public static void unZip(String sourceFileName, String targetDir) {
+        unZip(new File(sourceFileName), targetDir);
+    }
+
+    /**
+     * 将sourceFile解压到targetDir
+     * @param sourceFile - 源压缩文件
+     * @param targetDir - 目的文件夹绝对路径
+     * @throws FileNotFoundException
+     */
+    public static boolean unZip(File sourceFile, String targetDir) {
+        if( !sourceFile.exists() ){
+            LOGGER.warn("cannot find the file: " + sourceFile.getPath());
+            return false;
+        }
+        if( !targetDir.endsWith(File.separator) ){
+            targetDir += File.separator;
+        }
+        ZipFile zipFile = null;
+        try {
+            //解决中文文件名乱码问题
+            zipFile = new ZipFile(sourceFile, Charset.forName("GBK"));
+            Enumeration<?> entries = zipFile.entries();
+            while (entries.hasMoreElements() ){
+                ZipEntry entry = (ZipEntry) entries.nextElement();
+                if( entry.isDirectory() ){
+                    String dirPath = targetDir + entry.getName();
+                    createDirIfNotExist(dirPath);
+                } else{
+                    File targetFile = new File(targetDir + entry.getName());
+                    createFileIfNotExist(targetFile);
+                    InputStream is = null;
+                    FileOutputStream fos = null;
+                    is = zipFile.getInputStream(entry);
+                    fos = new FileOutputStream(targetFile);
+                    int len;
+                    byte[] buf = new byte[1024];
+                    while( (len = is.read(buf)) != -1 ){
+                        fos.write(buf, 0, len);
+                    }
+                    is.close();
+                    fos.close();
+                }
+            }
+        } catch (ZipException e) {
+            LOGGER.warn("ZipException occurred.");
+            return false;
+        } catch (IOException e) {
+            LOGGER.warn("IOException occurred.");
+            return false;
+        } finally {
+            if( zipFile != null ){
+                try {
+                    zipFile.close();
+                } catch (IOException e) {
+                    LOGGER.warn("IOException occurred.");
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    /**
+     * 创建文件夹目录
+     * @param path - 文件夹绝对路径，最终指向目录，例如/home/dir
+     */
+    public static void createDirIfNotExist(String path){
+        File file = new File(path);
+        if( !file.exists() ){
+            file.mkdirs();
+        }
+    }
+
+    /**
+     * 创建文件
+     * @param file - 文件
+     */
+    public static void createFileIfNotExist(File file) {
+        createDirIfNotExist(file.getParent());
+        try {
+            file.createNewFile();
+        } catch (IOException e) {
+            LOGGER.warn("IOException occurred while creating new file.");
         }
     }
 }

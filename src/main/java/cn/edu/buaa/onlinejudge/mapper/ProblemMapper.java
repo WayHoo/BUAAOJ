@@ -37,6 +37,13 @@ public interface ProblemMapper {
     List<Problem> getAllProblemsOfContest(int contestId);
 
     /**
+     * 获取指定竞赛下的所有题目的ID
+     * @param contestId - 竞赛ID
+     * @return - 题目ID列表
+     */
+    List<Long> getAllProblemIdOfContest(int contestId);
+
+    /**
      * 插入题目
      * @param problem - 题目对象
      */

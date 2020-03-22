@@ -3,7 +3,6 @@ package cn.edu.buaa.onlinejudge.mapper;
 import cn.edu.buaa.onlinejudge.model.CourseStudentRelationship;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
-import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 
@@ -50,12 +49,12 @@ public interface CourseStudentRelationshipMapper {
                                 @Param("role") int role);
 
     /**
-     * 审核学生的加入课程申请（接受1，拒绝0）
+     * 设置学生的加入课程申请状态（接受1，拒绝0）
      * @param courseId - 课程ID
      * @param studentId - 学生ID
      * @param isStudentAccept - 是否接受学生的申请
      */
-    void auditStudent(@Param("courseId") int courseId,
-                       @Param("studentId") long studentId,
-                       @Param("isStudentAccept") int isStudentAccept);
+    void setStudentAcceptance(@Param("courseId") int courseId,
+                              @Param("studentId") long studentId,
+                              @Param("isStudentAccept") int isStudentAccept);
 }
